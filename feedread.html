@@ -1,0 +1,1742 @@
+<!--
+    yocto-reader - A light-weight RSS reader aggregator prototype, version 0.2
+                   (http://yocto-reader.flouzo.net/)
+
+    Copyright (C) 2007 Loic Dachary (loic@dachary.org) 
+    Copyright (C) 2007 Chandan Kudige (chandan@nospam.kudige.com)
+    Copyright (C) 2008 Bradley M. Kuhn <bkuhn@ebb.org>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head><!--
+Content-type: Preventing XSRF in IE.
+
+--><title>Feed Reader (prototype)</title>
+
+
+<link type="text/css" rel="stylesheet" href="themes/default/settings.css">
+<link type="text/css" rel="stylesheet" href="themes/default/theme.css">
+<link href="themes/default/favicon.ico" rel="SHORTCUT ICON">
+
+<!-- we use jquery & nothing else -->
+<script type="text/javascript" src="reader/jquery.js"></script>
+
+<!-- template magic for everything -->
+<script type="text/javascript" src="reader/template.js"></script>
+
+<script type="text/javascript" src="reader/common.js"></script>
+<script type="text/javascript" src="reader/strings.js"></script>
+
+<!-- Mock Feed Data -->
+<script type="text/javascript" src="reader/feeddata.js"></script>
+
+<!-- item Cache -->
+<script type="text/javascript" src="reader/cache.js"></script>
+<!-- Feed Control -->
+<script type="text/javascript" src="reader/feed.js"></script>
+<!-- REST API -->
+<script type="text/javascript" src="reader/mockapi.js"></script>
+<!-- State Machine -->
+<script type="text/javascript" src="reader/fsm.js"></script>
+<!-- Reader Application Code -->
+<script type="text/javascript" src="reader/reader.js"></script>
+
+</head><noscript><style
+type="text/css"> div {display: none;} #noscript {padding: 3em;
+font-size: 130%;} </style>
+<p id="noscript">JavaScript must be enabled in order for you to use
+Reader. However, it seems JavaScript is either disabled or not
+supported by your browser. To use Reader, enable JavaScript by changing
+your browser options, then <a href="/reader/">try again</a>.</p></noscript>
+
+<body class="loaded"><a href="#" id="logo-container"><h1 id="logo"><span>Yocto Reader</span></h1></a>
+
+
+<p id="global-info1"><b id="src-url"><a href="yocto-reader.tar.gz" target="_blank">Source Code</a></b>
+|
+<b id="email-address">dummy@example.com</b>
+|
+<a id="permalink" href="#">Permalink</a>
+|
+<a id="permalink" target="_blank" href="keycuts.html">Keyboard Shortcuts</a>
+|
+<a id="settings-link" href="#"
+    onclick="Reader.handleEvent('evSettings', this);return false;">Settings</a>
+|
+<a href="#" onclick="alert('Not implemented');return false;">My Account</a>
+|
+<a id="help-link" target="_blank" href="#" onclick="alert('Not implemented');return false;">Help</a>
+|
+<a id="sign-out" href="#" onclick="alert('Not implemented');return false;">Sign Out</a>
+</p>
+<div style="clear: both"></div>
+<!-- templates and hidden elements -->
+<div id="message-area" class="hidden"></div>
+<div id="loading-area"><p>Loading...</p></div>
+
+<div id="message-area-outer" class="hidden"><table class="round-box" id="" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="s tl"></td>
+<td class="s"></td>
+<td class="s tr"></td></tr>
+<tr><td class="s"></td>
+<td class="c"><div id="message-area-inner"></div></td>
+<td class="s"></td></tr>
+<tr><td class="s bl"></td>
+<td class="s"></td>
+<td class="s br"></td></tr></tbody></table></div> <!-- message-area-outer -->
+
+<iframe name="quick-add-target" id="quick-add-target"></iframe>
+
+<div id="quick-add-bubble-holder" class="hidden"><table class="round-box" id="Table1" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="s tl"></td>
+<td class="s"></td>
+<td class="s tr"></td></tr>
+<tr><td class="s"></td>
+<td class="c">
+
+<!--
+  <form id="quick-add-form" action="/reader/quickadd" target="quick-add-target" method="post">
+-->
+  
+  <div id="quick-add-close" onclick="quickadd_close_clicked(this, event);">x</div>
+<span id="quick-add-subs">Add subscription</span>
+<span id="quick-add-instructions">Enter a search term to find feeds or paste a feed url.</span>
+<input name="quickadd" id="quickadd" autocomplete="off" type="text"><table id="quick-add-btn" class="button-container unselectable button-container-tight"><tbody><tr><td class="btl"></td>
+<td class="btr"></td></tr>
+<tr><td class="bbl"></td>
+<td class="bbr"><div class="button-body-container"><span class="button-body unselectable" onclick="DOM.quickadd.enter();">Add</span></div></td></tr></tbody></table>
+<div id="quick-add-helptext">e.g., googleblog.blogspot.com or cnn</div>
+<input name="T" autocomplete="off" type="hidden">
+
+<!--
+</form>
+-->
+</td>
+<td class="s"></td></tr>
+<tr><td class="s bl"></td>
+<td class="s"></td>
+<td class="s br"></td></tr></tbody></table></div> <!-- quick-add-bubble-holder -->
+
+<!-- Settings -->
+<div id="settings" class="hidden"><table class="round-box" id="" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="s tl"></td>
+<td class="s"></td>
+<td class="s tr"></td></tr>
+<tr><td class="s"></td>
+<td class="c"><div id="header"><h2>Settings</h2>
+<span id="close-settings-link" onclick="Reader.handleEvent('evReturnToReader', this);" class="close link">&laquo; Back to Reader</span></div>
+<div id="settings-navigation">
+  <h3 class="setting-group-title setting-tab-subscriptions selected"><a href="" class="setting-group-link" href="#" onclick="Reader.handleEvent('evSubTab');return false">Subscriptions</a></h3>
+  <h3 class="setting-group-title setting-tab-labels"><a href="" class="setting-group-link" onclick="Reader.handleEvent('evTagTab');return false">Tags</a></h3>
+  <h3 class="setting-group-title setting-tab-goodies"><a href="" class="setting-group-link"  onclick="Reader.handleEvent('evGoodiesTab');return false">Goodies</a></h3>
+  <h3 class="setting-group-title setting-tab-importexport"><a href="" class="setting-group-link"  onclick="Reader.handleEvent('evImexportTab');return false">Import/Export</a></h3>
+  <h3 class="setting-group-title setting-tab-extras"><a href="" class="setting-group-link" onclick="Reader.handleEvent('evPrefTab');return false">Preferences</a></h3>
+</div>
+<ul class="settings-list">
+  <!-- Settings => Subscriptions tab -->
+  <li class="setting-group selected" id="setting-subscriptions">
+  <h3 class="setting-group-title selected hidden"><a href="" class="setting-group-link">Subscriptions</a></h3>
+<div class="setting-body" id="setting-subscriptions-body">
+  <form action="" method="post">
+  <div class="settings-data-actions" id="setting-subscriptions-actions">
+  <!-- subs add feed -->
+  <div id="setting-subscriptions-add" class="hidden">Add a subscription by entering a URL for a feed or a website.
+   <div><input id="subs-add-url" type="text">
+     <input class="subs-add" value="Add" type="button"></div></div>
+  <!-- /subs add feed -->
+
+  <div class="subs-remove-add-focus"><span class="link">Display subscriptions</span></div>
+<div id="setting-subscriptions-bulk-edit"><div id="main-bulk-actions"><span class="select-actions">Select:
+<span class="subs-select-all link" onclick="Settings.select_all();">All <span id="subs-total"></span> subscriptions</span>,
+<span class="subs-select-none link" onclick="Settings.select_none();">None</span>,
+
+<span class="subs-select-unlabeled link" onclick="Settings.select_unassigned();">Unassigned</span>
+ <select class="subs-change-label" id="subs-folder-options"
+         onchange="Settings.folderChanged(this)">
+  <option value="">Please select feeds...</option>
+ </select>
+</span>
+  
+<input class="subs-unsubscribe" value="Unsubscribe" type="button"
+    onclick="Settings.unsubscribeSelected(this,event);"></div>
+<div id="other-bulk-actions"><div class="subs-filter">
+ <input class="subs-filter-input" id="subs-filter-input"
+        type="text"></input>
+<div class="subs-filter-prompt">Filter by name, tag, or URL</div></div></div></div></div>
+ 
+<table class="settings-data">
+  <tbody id="subscriptions">
+  </tbody>
+</table>
+</form>
+</div>
+</li>
+
+<!-- Settings => tags tab -->
+<li class="setting-group" id="setting-labels">
+<h3 class="setting-group-title hidden"><a href="" class="setting-group-link">Tags</a></h3>
+<div class="setting-body" id="setting-labels-body"><form action="" method="post"><div class="settings-data-actions" id="setting-labels-actions"><span class="select-actions">Select:
+<span class="labels-select-all link" onclick="Settings.select_alltags(event);">All <span id="labels-total"></span> tags</span>,
+<span class="labels-select-none link" onclick="Settings.select_notags(event);">None</span>,
+<span class="labels-select-public link" onclick="Settings.select_publictags(event);">Public</span>,
+<span class="labels-select-private link" onclick="Settings.select_privatetags(event);">Private</span></span>
+<select class="labels-change-sharing" onchange="Settings.shareOptionChanged(this);"><option value="0">Change sharing...</option>
+<option value="public" class="public">&nbsp;&nbsp;Public</option>
+<option value="private" class="private">&nbsp;&nbsp;Private</option></select>
+<input class="labels-delete" value="Delete selected" type="button"
+       onclick="Settings.removeSelectedTags();"></div>
+<table class="settings-data" id="labels"><tbody id="labels-list">
+  <!-- starred -->
+  <tr class="data-row labels-list-starred">
+    <td class="chk"><input class="chkbox ts-starred-checkbox" value="" type="checkbox" onchange="Settings.tagCheckChanged(this);"></td>
+<td class="fld-"><em>Your starred items</em><input type="hidden" value="_starred" class="fld-folder"></input></td>
+<td class="delete-cell"></td>
+<td class="change-sharing starred-change-sharing" onclick="Settings.togglepublic_clicked(event);"><img src="themes/default/icon-share-active.png" class="active-icon sharing-icon" title="Click to make this tag private" alt="Click to make this tag private">
+  <img src="themes/default/icon-share-inactive.png" class="inactive-icon sharing-icon" title="Click to make this tag public" alt="Click to make this tag public">
+</td>
+<td class="share-value"><span class="public-text sharing-text">public</span>
+   <span class="private-text sharing-text">private</span>
+</td>
+<td class="public-cell"><a href="#"  onclick="alert('Not implemented');return false;" target="_blank" class="public-link public-page-link">view public page</a>
+<span class="link public-link email-link">email a link</span>
+<span class="link public-link clip-link">add a clip to your site</span>
+</td>
+</tr>
+
+  <!-- shared -->
+  <tr class="data-row  labels-list-shared is-public">
+    <td class="chk">
+      <input class="chkbox" value="" type="checkbox" onchange="Settings.tagCheckChanged(this);" >
+    </td>
+<td><em>Your shared items</em><input type="hidden" value="_shared" class="fld-folder"></input></td>
+<td class="delete-cell"></td>
+<td class="change-sharing">
+</td>
+<td class="share-value"><span class="public-text sharing-text">public</span>
+   <span class="private-text sharing-text">private</span>
+</td>
+<td class="public-cell"><a href="#" onclick="alert('Not implemented');return false;" target="_blank" class="public-link public-page-link">view public page</a>
+<span class="link public-link email-link">email a link</span>
+<span class="link public-link clip-link">add a clip to your site</span>
+</td>
+</tr>
+
+<!-- generic tags added here -->
+
+</tbody></table></form></div>
+</li>
+
+<!-- Settings => Goodies tab -->
+<li class="setting-group" id="setting-goodies"><h3 class="setting-group-title hidden"><a href="" class="setting-group-link">Goodies</a></h3>
+<div class="setting-body" id="setting-goodies-body"><form action="" method="post"><div class="settings-data" id="goodies">
+<h2>Put Reader in a bookmark</h2>
+<div id="next-description"><p>The <b>next bookmark</b> is an innovative
+way to read your subscriptions. It allows you to use Yocto Reader
+through just one link - clicking on it takes you to the next unread
+item, marking it as read in the process. It is particularly useful for
+subscriptions which only include snippets or when you want to read an
+article in context.</p>
+<p>To use the <b>next bookmark</b>, simply drag the link below to your bookmark bar.</p>
+<table align="center"><tbody><tr><td><div class="bookmarklet"><a href="#" onclick="alert('Not implemented');return false;">Next&nbsp;&raquo;</a></div></td>
+<td><div class="next-hint">&nbsp;&nbsp;&lt;--&nbsp;drag this to your bookmarks bar</div></td></tr></tbody></table>
+<p>You can also create a <b>next bookmark</b> for a specific tag. To do so, select a tag below and drag the resulting link to your bookmark bar.</p>
+<table id="setting-goodies-actions" align="center"><tbody><tr><td><select class="next-select-label" id="next-label-selector"><option value="">Select a tag...</option>
+        <option value="abcd" class="label">abcd</option><option value="another" class="label">another</option><option value="economics" class="label">economics</option><option value="fun" class="label">fun</option><option value="geeky" class="label">geeky</option><option value="myself" class="label">myself</option><option value="video" class="label">video</option></select></td>
+<td><div class="bookmarklet"><a id="next-label-link" href="#" onclick="alert('Not implemented');return false;">Next<span id="next-label-name"></span>&nbsp;&raquo;</a></div></td></tr></tbody></table></div>
+
+<h2>Subscribe as you surf</h2>
+<p>If you find yourself repeatedly visiting a website to check for
+updates, or if you just stumble across a page you want to keep track
+of, you can easily subscribe to it in Yocto Reader using the <b>subscribe bookmark</b>.</p>
+<p>To use the <b>subscribe bookmark</b>, simply drag the link below to
+your bookmarks bar. Then, when you're on a web page, you can click the
+bookmark to view it in Yocto Reader.</p>
+<table align="center"><tbody><tr><td><div class="bookmarklet"><a href="#" onclick="alert('Not implemented');return false;">Subscribe...</a></div></td></tr></tbody></table>
+<p>Once you see the feed preview, confirm your subscription by clicking the "Subscribe" button within Reader.</p></div></form></div></li>
+<li class="setting-group" id="setting-importexport"><h3 class="setting-group-title hidden"><a href="" class="setting-group-link">Import/Export</a></h3>
+<div class="setting-body" id="setting-importexport-body"><div class="setting-import"><b>Import your subscriptions</b>
+<p>If you are switching from another feed reader, you can import your
+existing subscriptions into Yocto Reader. To do this, you first have
+to export your subscriptions in a standard format called OPML. <a href="#" onclick="alert('Not implemented');return false;" target="_top">Learn more about exporting your subscriptions from another feed reader.</a></p>
+<iframe name="import-form-target" id="import-form-target"></iframe>
+<form id="import-form" action="/reader/subscriptions/import" method="post" target="import-form-target" enctype="multipart/form-data"><label for="opml-file">Select an OPML file:</label>
+<input name="T" type="hidden">
+<input name="action" value="opml-upload" type="hidden">
+<input name="opml-file" id="opml-file" size="40" type="file">
+<div id="import-buttons"><input class="default" value="Upload" type="submit">
+<input id="import-cancel" value="Cancel" type="button"></div></form></div>
+<div class="setting-export"><b>Export your subscriptions</b>
+<p><a href="#" onclick="alert('Not implemented');return false;" target="_blank">Export your subscriptions as an OPML file.</a>
+<span class="more-info">(<a target="_blank" href="XXXen.wikipedia.org/wiki/OPML">More info about OPML files</a>)</span></p></div></div></li>
+<li class="setting-group" id="setting-extras"><h3 class="setting-group-title hidden"><a href="" class="setting-group-link">Preferences</a></h3>
+<div class="setting-body" id="setting-extras-body"><div class="extra"><div class="extra-header extra-start-page-header">Start page</div>
+<label>
+<select id="settings-prefs-dropdown" class="extras-start-page" onchange="FR_setProperty(FRP_START_PAGE, this.value);">
+  <option value="home" selected="selected">Home</option>
+  <option value="?allitems">
+    All items</option>
+  <option value="?starred">
+    Starred items</option>
+  <option value="?shared">
+    Shared items</option>
+  <option value="" disabled="disabled">&nbsp;</option>
+  <option value="?settings/subs">Settings</option>
+  <option value="?settings/subs">   &raquo; Subscriptions</option>
+  <option value="?settings/labels">   &raquo; Tags</option>
+  <option value="?settings/goodies">   &raquo; Goodies</option>
+  <option value="?settings/imexport">   &raquo; Import/Export</option>
+  <option value="?settings/prefs">   &raquo; Preferences</option>
+
+  <option value="" disabled="disabled">&nbsp;</option>
+  <option value="" disabled="disabled">Folders and Tags:</option>
+  <option value="" disabled="disabled">---------------</option>
+    <!-- add current tags here -->
+</select>
+</label></div>
+<div class="extra"><div class="extra-header">Scroll tracking</div>
+<label><input id="settings-prefs-scroll" class="extras-scroll-tracking" checked="checked" type="checkbox">
+In expanded view, mark items as read when you scroll past them.</label></div>
+
+<!--
+<div id="setting-view-selector" class="extra"><div class="extra-header">Revert to previous version</div>
+<p>Though it is not recommended, you can use the old version of Yocto Reader for a limited time. However, we ask that you please <a href="#" onclick="alert('Not implemented');return false;" target="_blank">let us know</a> why you're using it to help us improve the new interface to better fit your needs.</p>
+<button id="toggle-view-lens">Revert to previous version</button>
+<br>
+(You can always return to the current version.)</div></div>
+-->
+</li></ul></td>
+<td class="s"></td></tr>
+<tr><td class="s bl"></td>
+<td class="s"></td>
+<td class="s br"></td></tr></tbody></table>
+</div>
+<!-- /Settings -->
+
+<div id="main">
+
+<div id="nav">
+<div id="Reader">
+<!-- operation list -->
+<table class="round-box" id="selectors-box" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="s tl"></td>
+<td class="s"></td>
+<td class="s tr"></td></tr>
+<tr><td class="s"></td>
+<td class="c"><ul>
+  <li id="ol-home"  onclick="Reader.handleEvent('evHome', this)"><span class="link" >Home</span></li>
+<li id="ol-allitems" onclick="Reader.handleEvent('evAllItems', this);"><a href="#">All items
+  <span class="unread-count"> (<span class="fld-all_unread"></span>)</span>
+</a></li></ul>
+<!-- Brand operations -->
+<ul id="ol-brandlist">
+</ul>
+<!-- /Brand operations -->
+<ul><li id="trends-selector" onclick="Reader.handleEvent('evTrends', this);"><span href="#" class="link">Trends</span></li></ul></td>
+<td class="s"></td></tr>
+<tr><td class="s bl"></td>
+<td class="s"></td>
+<td class="s br"></td></tr></tbody></table>
+
+<!-- add feed -->
+<table class="round-box" id="add-box" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="s tl"></td>
+<td class="s"></td>
+<td class="s tr"></td></tr>
+<tr><td class="s"></td>
+<td class="c"><div id="add-directory"><a href="javascript:void(0)" onclick="Reader.handleEvent('evBrowse', this);" class="link">Browse &raquo;</a></div>
+<span class="link" id="add-subs" onclick="Reader.handleEvent('evAddSub', this);">Add subscription</span></td>
+<td class="s"></td></tr>
+<tr><td class="s bl"></td>
+<td class="s"></td>
+<td class="s br"></td></tr></tbody></table>
+
+<!-- feed list -->
+<div class="ol-feedlist" id="ol-feedlist">
+<table class="round-box" id="sub-tree-box" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="s tl"></td>
+<td class="s"></td>
+<td class="s tr"></td></tr>
+<tr><td class="s"></td>
+<td class="c"><div id="sub-tree-container"><table id="sub-tree-refresh" class="button-container unselectable button-container-tight scour-disabled"><tbody><tr><td class="btl"></td>
+<td class="btr"></td></tr>
+<tr><td class="bbl"></td>
+<td class="bbr"><div class="button-body-container"><span class="button-body unselectable" onclick="Reader.refresh();">Refresh</span></div></td></tr></tbody></table>
+<div id="all-subscriptions-header" class="sub-tree-header">Show:
+<span class="link" id="ol-feedlist-show-new" onclick="Reader.showUpdatedOnly();">updated</span>
+-
+<span id="ol-feedlist-show-all" onclick="Reader.showAll();">all</span></div>
+
+<!--
+<div id="new-subscriptions-header" class="sub-tree-header">Show:
+<strong>updated</strong>
+-
+<span class="link" id="ol-feedlist-show-all">all</span></div>
+-->
+<div id="sub-tree-resizer"  style="height:300px">
+<ul id="sub-tree">
+  <li class="folder unselectable expanded" id="sub-tree-root"><div class="toggle toggle-d-0"></div><a class="link" href="#" id="sub-tree-item-0-link"><img class="icon icon-d-0" src="themes/default/icon-folder.gif" id="sub-tree-item-0-icon" height="16" width="16"><span class="name name-d-0" id="sub-tree-item-0-name" title="root"><span class="name-text name-text-d-0">root</span><span class="unread-count unread-count-d-0" id="sub-tree-item-0-unread-count"></span></span></a>
+  <!-- list folders, feeds and tags -->
+  <ul id="fl-folderlist">
+  </ul>
+  <ul id="fl-feedlist">
+  </ul>
+  <ul id="fl-taglist">
+  </ul>
+    <!-- /list folders, feeds and tags -->
+</li>
+</ul>
+</div>
+
+<div id="sub-tree-footer"><a href="#" onclick="Reader.handleEvent('evSettings', this);return false;" id="sub-tree-subscriptions">Manage subscriptions &raquo;</a></div></div></td>
+<td class="s"></td></tr>
+<tr><td class="s bl"></td>
+<td class="s"></td>
+<td class="s br"></td></tr></tbody></table>
+</div>
+
+</div>
+</div>
+<!-- /Reader -->
+
+<div id="nav-toggler" onclick="Reader.toggleNav();"></div>
+
+<div id="chrome">
+
+<!-- Trends View -->
+<div id="trendsview" class="hidden"><!--
+Content-type: Preventing XSRF in IE.
+
+-->
+<div id="page-title"><table class="round-box" id="trends-header-box" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="s tl"></td>
+<td class="s"></td>
+<td class="s tr"></td></tr>
+<tr><td class="s"></td>
+<td class="c">Trends</td>
+<td class="s"></td></tr>
+<tr><td class="s bl"></td>
+<td class="s"></td>
+<td class="s br"></td></tr></tbody></table></div>
+<div id="trends">
+<table class="trends-columns">
+  <tbody><tr>
+    <td class="left-column">
+      <div id="trends-item-count-header">From your <b> <span class="fld-nfeeds">21</span>  subscriptions</b>, over the last 30 days <b>you read  <span class="fld-nread">21<span>  items</b>, <b>starred  <span class="fld-nstarred">1</span>  items</b>, <b>shared  <span class="fld-nshared">1</span>  items</b>, and <b>emailed  <span class="fld-nemailed">1</span>  items</b>.</div></td>
+      <td class="right-column">
+        <div id="trends-period-tab" class="tab-group">
+  <table class="round-box unselectable tab-header tab-header-selected" id="day-bucket-chart" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+    <tr>
+      <td class="s tl"></td>
+<td class="s"></td>
+<td class="s tr"></td></tr>
+<tr><td class="s"></td>
+<td class="c">Last 30 days</td>
+<td class="s"></td></tr>
+<tr><td class="s bl sq"></td>
+<td class="s"></td>
+<td class="s br sq"></td></tr></tbody></table>
+<table class="round-box unselectable tab-header" id="hour-bucket-chart" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="s tl"></td>
+<td class="s"></td>
+<td class="s tr"></td></tr>
+<tr><td class="s"></td>
+<td class="c">Time of day</td>
+<td class="s"></td></tr>
+<tr><td class="s bl sq"></td>
+<td class="s"></td>
+<td class="s br sq"></td></tr></tbody></table>
+<table class="round-box unselectable tab-header" id="dow-bucket-chart" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="s tl"></td>
+<td class="s"></td>
+<td class="s tr"></td></tr>
+<tr><td class="s"></td>
+<td class="c">Day of the week</td>
+<td class="s"></td></tr>
+<tr><td class="s bl sq"></td>
+<td class="s"></td>
+<td class="s br sq"></td></tr></tbody></table>
+
+
+<div class="tab-group-contents">
+<div id="day-bucket-chart-contents" class="tab-contents">
+<table class="bucket-chart">
+  <tbody>
+  <tr class="bucket-scale-dynrow">
+    <td class="bucket-scale"><div class="bucket-scale-container"><div class="bucket-scale-max fld-scalemax"></div>
+<div class="bucket-line-max" style="width: 364px; margin-right: -364px;"></div>
+<div class="bucket-scale-23 fld-scale2"></div>
+<div class="bucket-line-23" style="width: 364px; margin-right: -364px;"></div>
+<div class="bucket-scale-13 fld-scale1"></div>
+<div class="bucket-line-13" style="width: 364px; margin-right: -364px;"></div>
+<div class="bucket-scale-0 fld-scale0"></div>
+<div class="bucket-line-0" style="width: 364px; margin-right: -364px;"></div></div>
+  </td>
+  <!-- start dynamic -->
+  <!-- end dynamic -->
+</tr>
+<tr class="bucket-labels">
+  <td></td><th colspan="9">3 weeks ago</th>
+<th colspan="7">2 weeks ago</th>
+<th colspan="7">1 week ago</th>
+<th colspan="7">Today</th></tr></tbody></table>
+<div class="explanation bucket-chart-description">Items read, day by day, over the past 30 days</div></div>
+
+<div id="hour-bucket-chart-contents" class="tab-contents hidden">
+<table class="bucket-chart">
+  <tbody>
+  <tr class="bucket-scale-dynrow">
+    <td class="bucket-scale"><div class="bucket-scale-container"><div class="bucket-scale-max fld-scalemax"></div>
+<div class="bucket-line-max" style="width: 316px; margin-right: -316px;"></div>
+<div class="bucket-scale-23 fld-scale2"></div>
+<div class="bucket-line-23" style="width: 316px; margin-right: -316px;"></div>
+<div class="bucket-scale-13 fld-scale1"></div>
+<div class="bucket-line-13" style="width: 316px; margin-right: -316px;"></div>
+<div class="bucket-scale-0 fld-scale0"></div>
+<div class="bucket-line-0" style="width: 316px; margin-right: -316px;"></div></div>
+    </td>
+<!-- start dynamic -->
+<!-- end dynamic -->
+</tr>
+<tr class="bucket-labels">
+  <td></td><th colspan="6">6 AM</th>
+  <th colspan="6">Noon</th>
+  <th colspan="6">6 PM</th>
+  <th colspan="6">Midnight</th></tr></tbody></table>
+  <div class="explanation bucket-chart-description">Items read by time of day</div></div>
+
+  <div id="dow-bucket-chart-contents" class="tab-contents hidden">
+  <table class="bucket-chart">
+    <tbody>
+    <tr class="bucket-scale-dynrow">
+      <td class="bucket-scale"><div class="bucket-scale-container"><div class="bucket-scale-max fld-scalemax"></div>
+<div class="bucket-line-max" style="width: 151px; margin-right: -151px;"></div>
+<div class="bucket-scale-23 fld-scale2"></div>
+<div class="bucket-line-23" style="width: 151px; margin-right: -151px;"></div>
+<div class="bucket-scale-13 fld-scale1"></div>
+<div class="bucket-line-13" style="width: 151px; margin-right: -151px;"></div>
+<div class="bucket-scale-0 fld-scale0"></div>
+<div class="bucket-line-0" style="width: 151px; margin-right: -151px;"></div></div>
+      </td>
+      <!-- start dynamic -->
+      <!-- end dynamic -->
+</tr>
+<tr class="bucket-labels">
+  <td></td><th class="dow">S</th>
+  <th class="dow">M</th>
+  <th class="dow">T</th>
+  <th class="dow">W</th>
+  <th class="dow">T</th>
+  <th class="dow">F</th>
+  <th class="dow">S</th>
+</tr></tbody></table>
+<div class="explanation bucket-chart-description">Items read by day of the week</div></div>
+<div id="null-contents" class="tab-contents hidden">null</div>
+<div id="null-contents" class="tab-contents hidden">null</div></div></div></td></tr>
+</tbody>
+</table>
+
+<table class="trends-columns trends-columns-fixed"><tbody><tr><td class="left-column"><h2>Reading trends</h2>
+<div class="explanation">Your item reading trends for the last 30 days</div>
+<div id="trends-brand-tab" class="tab-group"><table class="round-box unselectable tab-header tab-header-selected" id="trends-most-read-sorting" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="s tl"></td>
+<td class="s"></td>
+<td class="s tr"></td></tr>
+<tr><td class="s"></td>
+<td class="c">Read</td>
+<td class="s"></td></tr>
+<tr><td class="s bl sq"></td>
+<td class="s"></td>
+<td class="s br sq"></td></tr></tbody></table>
+<table class="round-box unselectable tab-header" id="trends-most-starred-sorting" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="s tl"></td>
+<td class="s"></td>
+<td class="s tr"></td></tr>
+<tr><td class="s"></td>
+<td class="c">Starred</td>
+<td class="s"></td></tr>
+<tr><td class="s bl sq"></td>
+<td class="s"></td>
+<td class="s br sq"></td></tr></tbody></table>
+<table class="round-box unselectable tab-header" id="trends-most-shared-sorting" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="s tl"></td>
+<td class="s"></td>
+<td class="s tr"></td></tr>
+<tr><td class="s"></td>
+<td class="c">Shared</td>
+<td class="s"></td></tr>
+<tr><td class="s bl sq"></td>
+<td class="s"></td>
+<td class="s br sq"></td></tr></tbody></table>
+<table class="round-box unselectable tab-header" id="trends-most-emailed-sorting" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="s tl"></td>
+<td class="s"></td>
+<td class="s tr"></td></tr>
+<tr><td class="s"></td>
+<td class="c">Emailed</td>
+<td class="s"></td></tr>
+<tr><td class="s bl sq"></td>
+<td class="s"></td>
+<td class="s br sq"></td></tr></tbody></table>
+<table class="round-box unselectable tab-header" id="trends-mobile-sorting" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="s tl"></td>
+<td class="s"></td>
+<td class="s tr"></td></tr>
+<tr><td class="s"></td>
+<td class="c">Read on mobile</td>
+<td class="s"></td></tr>
+<tr><td class="s bl sq"></td>
+<td class="s"></td>
+<td class="s br sq"></td></tr></tbody></table>
+<div class="tab-group-contents">
+<div id="trends-most-read-sorting-contents" class="tab-contents">
+<div class="sorting-container show-top10">
+<table class="sorting"><thead><tr><th>Subscription</th>
+<th class="primary"># Read</th>
+<th class="secondary">% Read</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<!-- dynamic rows -->
+</tbody>
+</table>
+
+<div class="top-links">Show:
+<span class="link top10-link">top 10</span>
+-
+<span class="link top20-link">top 20</span>
+-
+<span class="link top40-link">top 40</span></div></div></div>
+<div id="trends-most-starred-sorting-contents" class="tab-contents hidden"><div class="sorting-container show-top10">
+<table class="sorting">
+  <thead><tr><th>Subscription</th>
+  <th class="primary"># Starred</th>
+
+  <th></th></tr></thead>
+<tbody>
+<!-- dynamic rows -->
+</tbody>
+</table>
+<div class="top-links">Show:
+<span class="link top10-link">top 10</span>
+-
+<span class="link top20-link">top 20</span>
+-
+<span class="link top40-link">top 40</span></div></div></div>
+<div id="trends-most-shared-sorting-contents" class="tab-contents hidden"><div class="sorting-container show-top10">
+<table class="sorting">
+  <thead><tr><th>Subscription</th>
+<th class="primary"># Shared</th>
+
+<th></th></tr></thead>
+<tbody>
+<!-- dynamic rows -->
+</tbody>
+</table>
+<div class="top-links">Show:
+<span class="link top10-link">top 10</span>
+-
+<span class="link top20-link">top 20</span>
+-
+<span class="link top40-link">top 40</span></div></div></div>
+<div id="trends-most-emailed-sorting-contents" class="tab-contents hidden"><div class="sorting-container show-top10"><table class="sorting"><thead><tr><th>Subscription</th>
+<th class="primary"># Emailed</th>
+
+<th></th></tr></thead>
+<tbody>
+<!-- dynamic rows -->
+</tbody>
+</table>
+<div class="top-links">Show:
+<span class="link top10-link">top 10</span>
+-
+<span class="link top20-link">top 20</span>
+-
+<span class="link top40-link">top 40</span></div></div></div>
+<div id="trends-mobile-sorting-contents" class="tab-contents hidden">
+<div class="sorting-empty">You have not read any items on a mobile device. Visit Yocto Reader on your phone to try it.</div></div></div></div></td>
+<td class="right-column"><h2>Subscription trends</h2>
+<div class="explanation">Your subscription trends for the last 30 days</div>
+<div id="trends-freq-tab" class="tab-group"><table class="round-box unselectable tab-header tab-header-selected" id="trends-most-updated-sorting" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="s tl"></td>
+<td class="s"></td>
+<td class="s tr"></td></tr>
+<tr><td class="s"></td>
+<td class="c">Frequently updated</td>
+<td class="s"></td></tr>
+<tr><td class="s bl sq"></td>
+<td class="s"></td>
+<td class="s br sq"></td></tr></tbody></table>
+<table class="round-box unselectable tab-header" id="trends-least-updated-sorting" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="s tl"></td>
+<td class="s"></td>
+<td class="s tr"></td></tr>
+<tr><td class="s"></td>
+<td class="c">Inactive</td>
+<td class="s"></td></tr>
+<tr><td class="s bl sq"></td>
+<td class="s"></td>
+<td class="s br sq"></td></tr></tbody></table>
+
+
+
+<div class="tab-group-contents"><div id="trends-most-updated-sorting-contents" class="tab-contents"><div class="sorting-container show-top10"><table class="sorting"><thead><tr><th>Subscription</th>
+<th class="primary">Items/Day</th>
+<th class="secondary">% Read</th>
+<th></th></tr></thead>
+<tbody>
+<!-- dynamic rows -->
+</tbody></table>
+<div class="top-links">Show:
+<span class="link top10-link">top 10</span>
+-
+<span class="link top20-link">top 20</span>
+-
+<span class="link top40-link">top 40</span></div></div></div>
+<div id="trends-least-updated-sorting-contents" class="tab-contents hidden"><div class="sorting-container show-top10"><table class="sorting"><thead><tr><th>Subscription</th>
+<th class="primary">Last Updated</th>
+
+<th></th></tr></thead>
+<tbody>
+<!-- dynamic row -->
+</tbody></table>
+<div class="top-links">Show:
+<span class="link top10-link">top 10</span>
+-
+<span class="link top20-link">top 20</span>
+-
+<span class="link top40-link">top 40</span></div></div></div>
+<div id="null-contents" class="tab-contents hidden">null</div>
+<div id="null-contents" class="tab-contents hidden">null</div>
+<div id="null-contents" class="tab-contents hidden">null</div></div></div></td></tr></tbody></table>
+<h2>Tags</h2>
+<div class="explanation">The more items a tag has, the bigger it appears. The more of those items you have read, the darker it is.</div>
+<ol id="trends-tag-cloud" class="cloud">
+<!--
+   <li class="x0 y1"><a class="trends-cloud-stream-link" href="#" onclick="alert('Not implemented');return false;">abcd</a></li> 
+   <li class="x2 y0"><a class="trends-cloud-stream-link" href="#" onclick="alert('Not implemented');return false;">another</a></li> 
+   <li class="x4 y4"><a class="trends-cloud-stream-link" href="#" onclick="alert('Not implemented');return false;">economics</a></li> 
+   <li class="x4 y2"><a class="trends-cloud-stream-link" href="#" onclick="alert('Not implemented');return false;">fun</a></li> 
+   <li class="x3 y3"><a class="trends-cloud-stream-link" href="#" onclick="alert('Not implemented');return false;">geeky</a></li> 
+   <li class="x1 y4"><a class="trends-cloud-stream-link" href="#" onclick="alert('Not implemented');return false;">myself</a></li> 
+   <li class="x1 y1"><a class="trends-cloud-stream-link" href="#" onclick="alert('Not implemented');return false;">video</a></li>
+-->
+</ol>
+</div>
+</div>
+<!-- /Trends View -->
+
+<!-- List View -->
+<div id="listview" class="hidden">
+<!-- Viewer Controls -->
+<div id="viewer-header"><div id="viewer-controls"><div id="viewer-controls-container-main"><div id="viewer-controls-container">
+
+<table id="lv-settings-menu" class="button-container unselectable button-container-menu scour-disabled allitems-menu" onclick="ReaderViewer.settingsClicked(this, event);"><tbody><tr><td class="btl"></td>
+<td class="btr"></td></tr>
+<tr><td class="bbl"></td>
+<td class="bbr"><div class="button-body-container"><div class="button-menu-arrow"></div><span class="button-body unselectable">
+  <span class="lv-settings-switch allitems-switch">View settings...</span>
+  <span class="lv-settings-switch folder-switch">Folder settings...</span>
+  <span class="lv-settings-switch single-feed-switch">Feed settings...</span>
+  </div></td></tr></tbody></table>
+
+  <!-- /view settings menu choices -->
+  
+<div id="subscribe-area"></div>
+<table class="round-box unselectable tab-header" id="view-cards" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="s tl"></td>
+<td class="s"></td>
+<td class="s tr"></td></tr>
+<tr><td class="s"></td>
+<td class="c"><span onclick="ReaderViewer.setExpanded(true);">Expanded view</span></td>
+<td class="s"></td></tr>
+<tr><td class="s bl sq"></td>
+<td class="s"></td>
+<td class="s br sq"></td></tr></tbody></table>
+<table class="round-box unselectable tab-header tab-header-selected" id="view-list" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="s tl"></td>
+<td class="s"></td>
+<td class="s tr"></td></tr>
+<tr><td class="s"></td>
+<td class="c"><span onclick="ReaderViewer.setExpanded(false);">List view</span></td>
+<td class="s"></td></tr>
+<tr><td class="s bl sq"></td>
+<td class="s"></td>
+<td class="s br sq"></td></tr></tbody></table></div>
+<!-- XXX settings menu items were here -->
+  <!-- view settings menu choices TODO -->
+<ul id="lv-settings-menu-contents" class="hidden" >
+  <li id="order-by-newest" class="allitems-switch folder-switch single-feed-switch menu-item chooser-item chooser-item-selected" onclick="ReaderViewer.sortBy('newest');">Sort by newest</li>
+  <li id="order-by-oldest" class="allitems-switch folder-switch single-feed-switch menu-item chooser-item " onclick="ReaderViewer.sortBy('oldest');">Sort by oldest</li>
+  <li id="order-by-auto" class="allitems-switch folder-switch menu-item chooser-item " onclick="ReaderViewer.sortBy('auto');">Sort by auto</li>
+  <li id="set-as-start" class="allitems-switch divider menu-item chooser-item ">Set as start page</li>
+  <li id="stream-unsubscribe" class="single-feed-switch divider menu-item chooser-item "
+onclick="ReaderViewer.handleEvent('evDelete', this);"
+  >Unsubscribe</li>
+  <li id="stream-rename" class="single-feed-switch menu-item chooser-item "
+onclick="ReaderViewer.handleEvent('evRename');"
+  >Rename subscription...</li>
+  <li id="stream-folder-chooser" class="single-feed-switch divider menu-item"><span class="button-body">Change folders:</span>
+    <ul class="contents">
+      <li class="chooser-item">abcd</li>
+      <li class="chooser-item chooser-item-selected">fun</li>
+      <li class="chooser-item">video</li>
+      <li class="chooser-item">New folder...</li>
+    </ul>
+  </li>
+</ul>
+</div></div>
+<div id="lv-title" class="title">All items</div></div>
+<!-- /Viewer Controls -->
+
+<!-- Viewer Main Area -->
+<table id="viewer-box-table"><tbody><tr><td id="viewer-box" class=""><div id="viewer-box-inner"><div class="show-all" id="viewer-top-links"><span id="viewer-all-new-links-parent"><span id="viewer-new-links" class="viewer-links">Show:
+<strong><span class="lv-unread-count"></span>&nbsp;new items</strong>
+-
+<span class="link" id="show-all">all items</span></span>
+
+<!-- List View readonly links -->  
+<span id="viewer-all-links" class="viewer-links">Show:
+<span class="link" id="lv-show-new" onclick="ReaderViewer.showUnreadOnly();">
+  <span class="lv-unread-count"></span>&nbsp;new items</span>
+-
+<span class="link" id="lv-show-all" onclick="ReaderViewer.showAll();">all items</span></span></span>
+<!-- /List View readonly links -->  
+
+<table id="mark-all-as-read" class="button-container unselectable button-container-tight scour-disabled"><tbody><tr><td class="btl"></td>
+<td class="btr"></td></tr>
+<tr><td class="bbl"></td>
+<td class="bbr"><div class="button-body-container"><span class="button-body unselectable" onclick="markall_clicked(this,event);">Mark all as read</span></div></td></tr></tbody></table>
+<table id="viewer-refresh" class="button-container unselectable button-container-tight"><tbody><tr><td class="btl"></td>
+<td class="btr"></td></tr>
+<tr><td class="bbl"></td>
+<td class="bbr"><div class="button-body-container"><span class="button-body unselectable lv-refresh" onclick="refresh_clicked(this,event);">Refresh</span></div></td></tr></tbody></table>
+<div class="clr"></div>
+<div id="quick-add-success" class="hidden"><div id="quick-add-success-message">You have subscribed to "<span id="quick-add-success-title">All items</span>."</div>
+<div id="quick-add-success-folder-chooser" class="folder-chooser"><table id="Table2" class="button-container unselectable button-container-tight button-container-menu"><tbody><tr><td class="btl"></td>
+<td class="btr"></td></tr>
+<tr><td class="bbl"></td>
+<td class="bbr"><div class="button-body-container"><div class="button-menu-arrow"></div><span class="button-body unselectable">Add to a folder...</span></div></td></tr></tbody></table>
+<ul class="contents hidden"></ul></div>
+<div class="clr"></div></div></div>
+
+<!-- ListView/ExpandedView -->
+<div class="list" style="height: 530px; width: 800px; visibility: visible;" id="entries">
+</div>
+
+</div>
+
+<div id="chrome-footer-container"><table id="entries-up" class="button-container unselectable button-container-tight" onclick="ReaderViewer.prevItem();"><tbody><tr><td class="btl"></td>
+<td class="btr"></td></tr>
+<tr><td class="bbl"></td>
+<td class="bbr"><div class="button-body-container"><span class="button-body unselectable">Previous item</span></div></td></tr></tbody></table>
+<table id="entries-down" class="button-container unselectable button-container-tight" onclick="ReaderViewer.nextItem();"><tbody><tr><td class="btl"></td>
+<td class="btr"></td></tr>
+<tr><td class="bbl"></td>
+<td class="bbr"><div class="button-body-container"><span class="button-body unselectable">Next item</span></div></td></tr></tbody></table>
+<div class="" id="lv-status">loading...</div></div></div></td></tr></tbody></table>
+
+<!-- /View Main Area -->
+</div>
+
+<!-- search result area -->
+
+<div id="searchview" style="height: 508px;" class="hidden"><div><div id="directory-search-results"><table cellspacing="0" cellpadding="0" border="0" id="Table10" class="round-box directory-header-box"><tbody><tr><td class="s tl"/>
+<td class="s"/>
+<td class="s tr"/></tr>
+<tr><td class="s"/>
+<td class="c"><h2>Feeds matching "<span id="sv-keyword" class="query"></span>"</h2></td>
+<td class="s"/></tr>
+<tr><td class="s bl"/>
+<td class="s"/>
+<td class="s br"/></tr></tbody></table>
+<span id="directory-search-return" class="link directory-return-link"
+       onclick="ReaderViewer.handleEvent('evReturnToFD');">
+<< Return to feed discovery</span>
+
+<ul id="sr-container" class="results">     </ul>
+<div id="directory-search-results-paging">
+</div></div><script type="text/javascript"></script></div></div>
+<!-- search result area -->
+
+<!-- feeds bundles area -->
+<div id="browsefeedsview" class="hidden"><div><table cellspacing="0" cellpadding="0" border="0" id="directory-box" class="round-box"><tbody><tr><td class="s tl"/>
+<td class="s"/>
+<td class="s tr sq"/></tr>
+<tr><td class="s"/>
+<td class="c"><div id="import-prompt">Already using a feed reader?
+<span id="import-link"  class="link" onclick="ReaderViewer.handleEvent('evImport');">Import your subscriptions &raquo;</span></div>
+<h4 id="directory-welcome-title">Welcome to Yocto Reader!</h4>
+<h4 id="directory-title">Browse and discover feeds</h4>
+<div id="directory-contents">
+<div id="bundles"><h3>Get started quickly with feed bundles</h3>
+<div class="directory-section"><p>The easiest way to add subscriptions is to subscribe to one of our pre-packaged bundles. They have lots of interesting content in them, and you can always add or remove individual feeds later on.</p>
+<div id="bundles-list">
+
+</div>
+<span id="show-more-bundles-return-link" class="link directory-return-link clr"
+  onclick="lessbundles_clicked(this,event);">&laquo; Return to feed discovery</span></div></div>
+<div id="service-quickadd"><h3>Stay close to friends and family!</h3>
+<div class="directory-section"><p>Do your friends use Blogger, Flickr or MySpace? We've made it easy to keep up with users of these and other social sites.</p>
+<table cellspacing="0" cellpadding="0" border="0" id="Table11" class="round-box directory-form-box"><tbody><tr><td class="s tl"/>
+<td class="s"/>
+<td class="s tr"/></tr>
+<tr><td class="s"/>
+<td class="c"><form method="post" target="quick-add-target" action="/reader/quickadd" id="service-quickadd-form"><label for="service-quickadd-username">Username:</label>
+<input type="text" id="service-quickadd-username"/>
+<label for="service-quickadd-service">Service:</label>
+<select id="service-quickadd-service"><option value="XXX%1.blogspot.com/atom.xml">Blogger (blogspot.com)</option>
+<option value="XXXdel.icio.us/rss/%1">del.icio.us</option>
+<option value="XXXwww.flickr.com/photos/%1/">Flickr</option>
+<option value="XXX%1.livejournal.com/data/atom">LiveJournal</option>
+<option value="XXXblog.myspace.com/%1">MySpace</option>
+<option value="XXX%1.spaces.live.com/feed.rss">Windows Live Spaces</option>
+<option value="XXXwww.xanga.com/%1/rss">Xanga</option></select>
+<input type="submit" value="Subscribe" id="service-quickadd-submit"/>
+<input type="hidden" autocomplete="off" name="quickadd"/>
+<input type="hidden" autocomplete="off" name="T" value="954KZhQBAAA.i_t9FjwRG5gZkYib8rhfYA.sgSqkTtTQt2ZcCbCR3tP3w"/></form></td>
+<td class="s"/></tr>
+<tr><td class="s bl"/>
+<td class="s"/>
+<td class="s br"/></tr></tbody></table></div></div>
+<div id="directory-search"><h3>Search and browse</h3>
+<div class="directory-section"><p>You can also search for feeds by using keywords:</p>
+<table cellspacing="0" cellpadding="0" border="0" id="Table12" class="round-box directory-form-box"><tbody><tr><td class="s tl"/>
+<td class="s"/>
+<td class="s tr"/></tr>
+<tr><td class="s"/>
+<td class="c"><label for="directory-search-query">Keywords:</label>
+<input type="text" id="directory-search-query" size="55"/>
+<input value="Search for feeds" onclick="ReaderViewer.handleEvent('evSearch');"/></td>
+<td class="s"/></tr>
+<tr><td class="s bl"/>
+<td class="s"/>
+<td class="s br"/></tr></tbody></table>
+<p>Still looking? Get started with these category searches:</p>
+<table cellspacing="0" cellpadding="0" border="0" id="Table13" class="round-box directory-form-box"><tbody><tr><td class="s tl"/>
+<td class="s"/>
+<td class="s tr"/></tr>
+<tr><td class="s"/>
+<td class="c"><ul id="directory-category-list"><li><span id="directory-category-" class="link directory-category">All</span>,</li> <li><span id="directory-category-news" class="link directory-category">News</span>,</li> <li><span id="directory-category-funandgames" class="link directory-category">Fun & Games</span>,</li> <li><span id="directory-category-finance" class="link directory-category">Finance</span>,</li> <li><span id="directory-category-sports" class="link directory-category">Sports</span>,</li> <li><span id="directory-category-lifestyle" class="link directory-category">Lifestyle</span>,</li> <li><span id="directory-category-technology" class="link directory-category">Technology</span></li></ul></td>
+<td class="s"/></tr>
+<tr><td class="s bl"/>
+<td class="s"/>
+<td class="s br"/></tr></tbody></table></div></div></div></td>
+<td class="s"/></tr>
+<tr><td class="s bl"/>
+<td class="s"/>
+<td class="s br sq"/></tr></tbody></table>
+</div></div>
+<!-- feeds bundles area -->
+
+<!-- Home View -->
+<div id="home" class="hidden"><table class="round-box home-header-box" id="Table3" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="s tl"></td>
+<td class="s"></td>
+<td class="s tr"></td></tr>
+<tr><td class="s"></td>
+<td class="c"><div id="home-header">Home</div></td>
+<td class="s"></td></tr>
+<tr><td class="s bl"></td>
+<td class="s"></td>
+<td class="s br"></td></tr></tbody></table>
+<table id="sections"><tbody><tr><td class="section" id="left-section"><div id="overview"><div class="section-header">A look at what's new</div>
+<span id="hm-container">
+</span>
+  
+  </div></td>
+<td class="section" id="right-section">
+  <div class="section" id="recent-activity">
+  <div id="recent-activity-star" class="recent">
+  <h4>Recently <span class="link" onclick="Reader.openBrand('starred'); return false;">starred</span></h4>
+
+  </div>
+
+  <div id="recent-activity-share" class="recent"><h4>Recently <span class="link" onclick="Reader.openBrand('starred');return false;">shared</span></h4>
+<!--
+  <div class="recent-item"><span class="recent-title">Yahoo! Widgets</span>
+from
+<span class="recent-stream-title">Technosophy Unlimited</span></div>
+
+  <div class="recent-item"><span class="recent-title">New take on Google's "personal time"</span>
+from
+<span class="recent-stream-title">Technosophy Unlimited</span></div>
+
+  <div class="recent-item"><span class="recent-title">M$ - Microsoft ? Myspace ?</span>
+from
+<span class="recent-stream-title">Technosophy Unlimited</span></div></div>
+-->
+  </div>
+<div id="tips"><table class="round-box" id="tips-box" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="s tl"></td>
+<td class="s"></td>
+<td class="s tr"></td></tr>
+<tr><td class="s"></td>
+<td class="c hv-tips-container"><div class="fld-title section-header">Tips and tricks</div>
+<div id="tips-body" class="fld-content"><p>If you find yourself repeatedly visiting a
+website to check for updates, or if you just stumble across a page you
+want to keep track of, you can easily subscribe to it in Yocto Reader
+using the <b>subscribe bookmark</b>.</p>
+<p>To use the <b>subscribe bookmark</b>, simply drag the link below to
+your bookmarks bar. Then, when you're on a web page, you can click the
+bookmark to view it in Yocto Reader.</p>
+<table align="center"><tbody><tr><td><div class="bookmarklet"><a href="#" onclick="alert('not implemented'); return false;">Subscribe...</a></div></td></tr></tbody></table>
+<p>Once you see the feed preview, confirm your subscription by clicking the "Subscribe" button within Reader.</p></div></td>
+<td class="s"></td></tr>
+<tr><td class="s bl"></td>
+<td class="s"></td>
+<td class="s br"></td></tr></tbody></table></div>
+<div id="team-messages" class="hidden section"><div class="section-header">The latest messages from the Yocto Reader team</div>
+<div class="title"><a target="_blank" href="#" onclick="alert('not implemented'); return false;">Doing the Shuffle</a></div>
+<div class="info">via <a href="#" onclick="alert('not implemented'); return false;" class="f">Official Yocto Reader Blog</a> by Nick Baum on Jun 22, 2007</div>
+<div class="body" id="team-messages-snippet">
+
+Some of our users, like Robert Scoble, can go through 600 feeds in less time 
+than it takes to say "mark all as read":
+
+
+(Thanks Tim for this video!) 
+
+For those of you who don't have supernatural powers and would like a quick 
+and easy way to go ...
+<a href="#" onclick="alert('not implemented'); return false;" target="_blank">See more &raquo;</a></div></div></td></tr></tbody></table></div>
+<div id="overview-footer"><div id="footer"><a target="_blank" href="#" onclick="alert('not implemented'); return false;"><b>Yocto Reader Blog</b></a>
+-
+<a target="_blank" href="#" onclick="alert('not implemented'); return false;">Discuss</a>
+-
+<a target="_blank" href="#" onclick="alert('not implemented'); return false;">Privacy Policy</a>
+-
+<a target="_blank" href="#" onclick="alert('not implemented'); return false;">Help</a>
+<div class="copyright">©2007 (Copyright here)</div></div></div></div></div>
+</div></div>
+<div id="markup-templates"><div id="basic-entry-body-template"><ins class="item-body"></ins></div>
+<div id="enclosure-entry-body-template"><ins class="item-body"></ins>
+<div class="audio-player-container player"><script type="text/javascript">
+      function FlashRequest(command, args) {}
+      </script>
+<div class="audio-player-placeholder"></div>
+<div class="view-enclosure-parent"><a href="" class="" target="_blank"><ins class="view-enclosure"></ins></a></div></div></div>
+<span id="chrome-unsubscribe-template">Subscribed.
+<a href="" class="chrome-unsubscribe-link">Unsubscribe</a></span>
+<div id="chrome-subscribe-template"><input class="chrome-subscribe-button" value="Subscribe" type="button">
+<a href="" class="chrome-subscribe-edit-link"><span class="closed">Add tags</span>
+<span class="open">Hide tags</span></a></div>
+<span id="chrome-signin-template"><input class="chrome-signin-button" value="Sign in to subscribe" type="button"></span>
+<div id="chrome-subscribe-edit-template" class="chrome-subscribe-container"><input class="labels" id="chrome-subscribe-edit-tags" autocomplete="off" type="text">
+<label for="chrome-subscribe-edit-tags">Tags
+<span class="instructions">(optional, comma separated)</span></label>
+<div id="chrome-subscribe-edit-buttons"><input class="save" id="chrome-subscribe-edit-save" value="Save" type="submit">
+<input class="cancel" id="chrome-subscribe-edit-cancel" value="Cancel" type="button"></div></div>
+<div id="banner-template" class="banner"><div class="primary-message-parent"><ins class="primary-message"></ins></div>
+<div class="secondary-message-parent"><ins class="secondary-message"></ins></div></div>
+<div id="interrupt-first-scroll-template"><div class="transparency">&nbsp;</div>
+<div class="main"><table class="round-box" id="first-scroll" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="s tl"></td>
+<td class="s"></td>
+<td class="s tr"></td></tr>
+<tr><td class="s"></td>
+<td class="c"><h2>Tip: Managing Your Reading List</h2>
+<div class="text"><p>Before you get started, we want to let you know about an important feature of Yocto Reader.</p>
+<p>As you view items in your reading list, they will be automatically
+marked as read as you scroll down (when in the "Expanded" view).</p>
+<p>If you'd prefer to disable this feature, you can turn it off in <a href="" class="settings-link">Settings</a>.</p>
+<p class="dismiss"><a class="dismiss-link" href="">Dismiss this message</a>
+(it will not appear again)</p></div></td>
+<td class="s"></td></tr>
+<tr><td class="s bl"></td>
+<td class="s"></td>
+<td class="s br"></td></tr></tbody></table></div></div>
+<div id="interrupt-broadcast-template"><table class="round-box interrupt-broadcast-box" id="Table4" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="s tl"></td>
+<td class="s"></td>
+<td class="s tr"></td></tr>
+<tr><td class="s"></td>
+<td class="c"><div id="interrupt-broadcast-main"><div class="interrupt-broadcast-header">Your <b>shared items</b> are publicly accessible.</div>
+<div class="interrupt-broadcast-links">They are available as a page at  <a href="" target="_blank" class="shared-items-url"></a>  (and there's <a class="shared-items-feed-url" target="_blank">a feed</a> <img class="feed-icon" src="themes/default/icon-feed.png" alt="" align="absmiddle"> too)
+<br><br>
+You can remove any item from the list below by clicking on its "Unshare" link.</div>
+<div class="broadcast-actions"><div class="send-broadcast broadcast-action"><div class="broadcast-action-header">Tell your friends</div>
+You can use your Gmail account to <span class="email-shared-items link">email your shared items</span> to your friends, family and co-workers.</div>
+<div class="make-broadcast-clip broadcast-action"><div class="broadcast-action-header">Put a clip on your site or blog</div>
+<div>You can also copy and paste code to <span class="clip-shared-items link">put a clip of your shared items</span> on your site.</div>
+<div class="broadcast-action-section">If you use Blogger, it's even easier, just use the "Add to Blogger" button.</div></div></div></div></td>
+<td class="s"></td></tr>
+<tr><td class="s bl"></td>
+<td class="s"></td>
+<td class="s br"></td></tr></tbody></table></div>
+<div id="interrupt-broadcast-empty-template"><h2>You haven't shared any items yet.</h2>
+<p>Sharing interesting items with your friends is easy: simply click on the sharing icon.</p>
+<p class="broadcast-icon-screenshot-container"></p>
+<p>The item will then instantly appear on your public page at: <br> <br> <a href="" class="public-page-url link"></a> <br> <br> This page is accessible to anyone who knows its address, so all that's left to do is to let your friends know about it.</p>
+<a target="_blank" href="#" onclick="alert('not implemented'); return false;">Find out more about sharing</a></div>
+<div id="interrupt-oldest-first-template"><table class="round-box interrupt-oldest-first-box" id="Table5" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="s tl"></td>
+<td class="s"></td>
+<td class="s tr"></td></tr>
+<tr><td class="s"></td>
+<td class="c"><div id="interrupt-oldest-first-main">Sort by oldest only shows items from the last 30 days. <a target="_blank" class="learn-more-link" href="#" onclick="alert('not implemented'); return false;">Learn more</a> <span class="dismiss-link link">Dismiss</span></div></td>
+<td class="s"></td></tr>
+<tr><td class="s bl"></td>
+<td class="s"></td>
+<td class="s br"></td></tr></tbody></table></div>
+
+<ul><li id="viewer-user-tags-template"><a href=""><ins class="name"></ins></a></li></ul></div>
+<form action="" id="jumpstart" name="f"><input name="h" type="hidden"></form>
+<div id="image-preloader"><img src="themes/default/button-left.gif" alt="">
+<img src="themes/default/button-right.gif" alt="">
+<img src="themes/default/button-left-hover.gif" alt="">
+<img src="themes/default/button-right-hover.gif" alt="">
+<img src="themes/default/button-left-selected.gif" alt="">
+<img src="themes/default/button-right-selected.gif" alt="">
+<img src="themes/default/card-tb.gif" alt="">
+<img src="themes/default/card-lr.gif" alt="">
+<img src="themes/default/card-corners.gif" alt="">
+<img src="themes/default/card-tb-current.gif" alt="">
+<img src="themes/default/card-lr-current.gif" alt="">
+<img src="themes/default/card-corners-current.gif" alt="">
+<img src="themes/default/card-tb-read.gif" alt="">
+<img src="themes/default/card-lr-read.gif" alt="">
+<img src="themes/default/card-corners-read.gif" alt=""></div>
+<div id="keyboard-help-container"><table id="keyboard-help"><tbody><tr><th colspan="2">Navigation</th>
+<th colspan="2">Acting on items</th></tr>
+<tr><td class="key">j/k:</td><td class="desc">next/previous item</td>
+<td class="key">s:</td><td class="desc">star item</td></tr>
+<tr><td class="key">space:</td><td class="desc">next item or page</td>
+<td class="key">&lt;Shift&gt; + s:</td><td class="desc">share item</td></tr>
+<tr><td class="key">&lt;Shift&gt; + space:</td><td class="desc">previous item or page</td>
+<td class="key">v:</td><td class="desc">view original</td></tr>
+<tr><td class="key">n/p:</td><td class="desc">item scan down/up (list only)</td>
+<td class="key">t:</td><td class="desc">tag item</td></tr>
+<tr><td class="key">&lt;Shift&gt; + n/p:</td><td class="desc">next/previous subscription</td>
+<td class="key">m:</td><td class="desc">mark item as read/unread</td></tr>
+<tr><td class="key">&lt;Shift&gt; + x:</td><td class="desc">expand folder</td>
+<td class="key">o/enter:</td><td class="desc">expand/collapse item (list only)</td></tr>
+<tr><td class="key">&lt;Shift&gt; + o:</td><td class="desc">open subscription or folder</td>
+<td class="key">&lt;Shift&gt; + a:</td><td class="desc">mark all as read</td></tr>
+<tr><td></td><td></td>
+<td class="key">e:</td><td class="desc">email item</td></tr>
+<tr><th colspan="2">Jumping</th>
+<th colspan="2">Application</th></tr>
+<tr><td class="key">g then h:</td><td class="desc">go home</td>
+<td class="key">r:</td><td class="desc">refresh</td></tr>
+<tr><td class="key">g then a:</td><td class="desc">go to all items</td>
+<td class="key">u:</td><td class="desc">toggle full screen mode</td></tr>
+<tr><td class="key">g then s:</td><td class="desc">go to starred items</td>
+<td class="key">1:</td><td class="desc">switch to expanded view</td></tr>
+<tr><td class="key">g then &lt;Shift&gt; + s:</td><td class="desc">go to shared items</td>
+<td class="key">2:</td><td class="desc">switch to list view</td></tr>
+<tr><td class="key">g then u:</td><td class="desc">open subscription selector</td>
+<td class="key"></td></tr>
+<tr><td class="key">g then t:</td><td class="desc">open tag selector</td>
+<td class="key"></td></tr>
+<tr><td class="key">g then &lt;Shift&gt; + t:</td><td class="desc">open trends page</td>
+<td class="key"></td></tr></tbody></table>
+<div id="keyboard-help-tearoff-link-container"><span class="link keyboard-help-tearoff-link">Open in a new window</span></div>
+</div>
+
+<!--
+// XXX
+<div class="folder-chooser" style="position:absolute;top:30px;left:50px" ><table class="button-container unselectable button-container-tight button-container-menu" id="Table8"><tbody><tr><td class="btl"/>
+<td class="btr"/></tr>
+<tr><td class="bbl"/>
+<td class="bbr"><div class="button-body-container"><div class="button-menu-arrow"/><span class="button-body unselectable">Add to a folder...</span></div></td></tr></tbody></table>
+<ul class="contents hidden"/></div>
+-->
+  
+<!-- THIS SECTION CONTAINS ALL THE TEMPLATES -->
+
+<div id="templates">
+<ul>
+<!-- template for list of brands -->
+<li id="tpl-brandlist" class="tpl-brandlist brand-selector fld-icon" onclick="listbrand_clicked(this, event);"><span class="link name"><input type="hidden" class="fld-brand" value=""></input>
+     <span class="fld-display name-text">Starred</span>
+     <span class="unread-count"> (<span class="fld-brand_unread"></span>)</span>
+  </span></li>
+
+<!-- template for folder list -->
+<li id="tpl-folder"
+    class="folder unselectable collapsed">
+<div class="toggle"
+    onclick="Reader.toggleFolder($('.fld-name', this.parentNode).getdata());"
+  ></div>
+<span class="link folder-selector">
+<img 
+     class="icon" src="themes/default/icon-folder.gif" height="16" width="16">
+   <span class="name folder-invoke" 
+           onclick="folder_clicked(this, event);">
+     <span class="name-text fld-name"></span>
+     <span class="unread-count">&nbsp;(<span class="fld-folder_unread"></span>)</span>
+   </span>
+</span>
+  
+ <ul class="sfl-container">
+ </ul>
+</li>
+
+<!-- template for feedlist -->
+  <li id="tpl-feed" class="sub collapsed tpl-feed">
+    <div class="toggle toggle-d-1 hidden"></div>
+     <span class="link feed-selector feed-invoke" onclick="feed_clicked(this, event); return false;">
+<input type="hidden" value="" class="fld-feed"></input>
+<img class="icon icon-d-1" src="themes/default/icon-addfeed.gif" id="sub-tree-item-10-icon" height="16" width="16">
+<span class="name"><span class="name-text fld-title"></span>
+<span class="unread-count" >&nbsp;(<span class="fld-unread">23</span>) </span>
+</span></span></li>
+
+<!-- template for tag list -->
+  <li id="tpl-tagfolder" class="tag unselectable expanded" id="sub-tree-item-12-main"  onclick="tag_clicked(this, event);"><div class="toggle toggle-d-1 hidden"></div>
+     <span class="tag-selector link">
+     <img class="icon icon-d-1" src="themes/default/icon-tag.gif" id="sub-tree-item-12-icon" height="16" width="16"><span class="name name-d-1" id="sub-tree-item-12-name" title="abcd"><span class="name-text name-text-d-1 fld-name"></span><span class="unread-count unread-count-d-1" id="sub-tree-item-12-unread-count"></span></span>
+     </span>
+     </li>
+
+<!-- template for tag list in itemview -->
+     <li id="tpl-iv-tag-list" class="tag-invoke" onclick="tag_clicked(this, event);"><a href="#"><ins class="name fld-name"></ins></a>
+     </li>
+
+<!-- template for tag could in trends view / addclass x0-5 y0-5-->     
+<li class="tpl-tag-cloud x0 y1"><span class="fld-name trends-cloud-stream-link" onclick="Reader.openFolder(this.innerHTML);">abcd</span>&nbsp;</li> 
+
+<!-- template for search result -->
+     <!-- add class  result-subscribed if needed -->
+<li id="tpl-search" class="tpl-search clr result fld-entries"><h4 class="fld-entries-title"></h4>
+<p class="fld-entries-contentSnippet"></p>
+<div class="feed-url fld-entries-url"></div>
+<div class="subscribed">
+     <div class="subscribed-links"><span class="message">Subscribed</span>
+-
+<span class="link view feed-invoke" onclick="ReaderViewer.handleEvent('evView',this);">View</span>
+-
+<span class="link unsubscribe" onclick="ReaderViewer.handleEvent('evUnsubscribe', this);">Unsubscribe
+<input class="fld-entries-url" type="hidden" value=""></input>
+     </span>
+   
+- </div>
+
+<div>     
+<table class="sv-folder-menu button-container unselectable button-container-menu scour-disabled allitems-menu" onclick="ReaderViewer.searchAddFolder(this, event);"><tbody><tr><td class="btl"></td>
+<td class="btr"></td></tr>
+<tr><td class="bbl"></td>
+<td class="bbr">
+ <div class="button-body-container">
+  <div class="button-menu-arrow"></div><span class="button-body unselectable">
+  <span class="prompt">Add to folder ...</span>
+
+   <ul class="sv-folder-menu-contents contents hidden" >
+   </ul>
+
+ </div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<table class="button-container unselectable button-container-tight subscribe"
+  onclick="ReaderViewer.handleEvent ('evSubscribe',this);"
+  ><tbody><tr><td class="btl"/>
+<td class="btr"/></tr>
+<tr><td class="bbl"/>
+<td class="bbr"><div class="button-body-container">
+<input type="hidden" class="fld-entries-url" value="" />
+<input type="hidden" class="fld-entries-title" value="" />
+<span class="button-body unselectable">Subscribe</span></div></td></tr></tbody></table></li>
+</ul>
+
+<!-- template for bundle -->
+
+    <div id="tpl-bundle-news" class="bundle tpl-bundle-news">
+        <div class="bundle-main">
+          <div class="bundle-title fld-title">News</div>
+            <table class="button-container unselectable button-container-tight bundle-subscribe"
+                id="bundle-add-news" onclick="subscribeBundle_clicked (this.parentNode.parentNode)">
+                <tbody>
+                    <tr>
+                        <td class="btl" />
+                        <td class="btr" />
+                    </tr>
+                    <tr>
+                        <td class="bbl" />
+                        <td class="bbr">
+                            <input type="hidden" class="feeds-bundle-data"/>
+                            <div class="button-body-container">
+                                <span class="button-body unselectable">Subscribe</span></div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="bundle-subscribed hidden">
+                <span class="message">Subscribed</span> - <a class="bundle-view-link bundle-invoke fld-title" href="#">
+                    View</a>
+            </div>
+            <a href="javascript:void(0)" class="bundle-includes"><span class="bundle-subscriptions">
+                <span class="fld-feedcount">4</span> feeds &raquo;</span>
+                <div class="bundle-hover">
+                    <div class="bundle-contents-header">
+                        Feeds in this bundle:</div>
+                    <ul>
+                        <li class="fld-subscriptions"><span class="fld-subscriptions-title">BBC News (World)</span></li>
+                    </ul>
+                </div>
+            </a>
+        </div>
+    </div> 
+
+<!-- template for more bundles link -->
+<div class="tpl-more-bundles" id="show-more-bundles-container"><span class="link" id="show-more-bundles-link" onclick="morebundles_clicked(this, event);">More bundles...</span>
+</div>                    
+
+<!-- template for home view -->
+<div id="tpl-summary" class="overview-segment tpl-summary">
+  <div class="overview-header"><span class="link title">
+     <span class="openfeed-link" onclick="feed_clicked(this,event);"><span class="fld-title"></span>
+   <input type="hidden" class="fld-feed" value=""></input>
+</span>
+     <span class="unread">
+         <span class="fld-feedunread"></span></span>
+  </span>
+</div>
+
+<span class="fld-entries">  
+  <div class="overview-metadata" dir="ltr">
+  <span class="fld-entries-title"></span>
+  <span class="fld-entries-contentSnippet"></span>
+  </div>
+</span>
+<p/>  
+ <div class="label summary-more" align="right">See more from  
+ <span class="summary-folder-link link" onclick="Reader.openFolder($('.fld-folder', this).getdata());">
+     <span class="fld-folder"></span> 
+     <span class="fld-folderunread"></span>
+ </span>
+&nbsp;&raquo;
+
+
+</div>
+</div>
+
+<!-- template for list view item -->
+<div class="tpl-entry">  
+<div class="entry fld-entries">
+  <div class="collapsed" onclick="item_clicked(this.parentNode, event); return false;"><div class="entry-icons">
+    <div class="item-star star link empty" onclick="star_clicked(this, event)"></div></div>
+    <div title="Aug 1, 2007 10:45 PM" class="entry-date fld-entries-formatDate">10 AM</div>
+    <div class="entry-main">
+    <a href="#" target="_blank" class="entry-original fld-entries-link"></a>
+    <span class="entry-source-title link fld-title"></span>
+    <div class="entry-secondary">
+    <h2 class="entry-title fld-entries-title"></h2>
+    <span class="entry-secondary-snippet"> - <span class="snippet fld-entries-contentSnippet"></span></span>
+    </div>
+   </div>
+  </div>
+
+<!-- inline itemview -->
+<div class="entry-container iv-main"><div class="entry-icons"><div class="link empty cornerstar"></div></div>
+<div class="entry-main">
+<div class="entry-date fld-entries-formatDate" >8:00 AM</div>
+<h2 class="entry-title">
+<a class="iv-goto fld-entries-link" target="_blank" href="#" >
+<span class="fld-entries-title"></span><img src="themes/default/icon-goto.gif" class="entry-title-go-to" height="18" width="18"></a>
+</h2>
+
+<div class="iv-from-container entry-author"><span class="entry-source-title-parent">from
+<span class="iv-from link" onclick="ReaderViewer.handleEvent('evFrom', this);">
+<input type="hidden" value="" class="fld-feed"></input>
+<span class="fld-title">Quotes of the Day</span></span>
+</span> <span class="fld-entries-formatAuthor"></span>
+</div>
+
+<div class="entry-body"><div id="Div1">
+<ins class="item-body"><div class="fld-entries-content"></div>
+</ins>
+</div></div></div>
+
+<input type="hidden" class="fld-entries-itemid" value=""></input>
+ <div class="entry-actions">
+   <span class="item-star star link" onclick="star_clicked(this, event);">
+     <span class="item-add-star">Add star</span>
+     <span class="item-remove-star">Remove star</span>
+   </span>
+   <span class="item-share star link" onclick="share_clicked(this, event);">
+      <span class="item-add-share">Share</span>
+      <span class="item-remove-share">Unshare</span>
+   </span>
+   <span class="email iv-email">
+      <span class="link" onclick="ReaderViewer.handleEvent('evEmail', this);">Email</span>
+      <span class="updated-text"> (Updated)</span>
+   </span>
+   <span class="item-read star link" onclick="itemread_clicked(this,event);">Mark as read</span>
+   <span class="tag link">
+      <span class="entry-tagging-action-title iv-edittags" onclick="ReaderViewer.handleEvent('evAddTag', this);">Edit tags: </span>
+      <ul class="user-tags-list">
+      </ul>
+    </span>
+ </div>
+
+</div>
+<!-- /inline itemview -->
+  </div>
+</div>
+
+<!-- template for expanded view item -->
+<div class="tpl-entry-exp">
+<div class="entry">
+<table class="card"><tbody class="card-tbody">
+  <tr>
+    <td class="ctl"></td>
+    <td class="ct"></td>
+    <td class="ctr"></td>
+  </tr>
+  <tr>
+    <td class="cl"></td>
+    <td class="cc">
+      <div class="entry-container">
+        <div class="entry-icons">
+          <div class="item-star star link empty"></div>
+        </div>
+        <div class="entry-main">
+          <div class="entry-date  fld-entries-formatDate"></div>
+          <h2 class="entry-title">
+      <a class="iv-goto fld-entries-link" target="_blank" href="#">
+      <span class="fld-entries-title"></span><img src="themes/default/icon-goto.gif" class="entry-title-go-to" alt="" height="18" width="18"></a></h2>
+
+          <div class="iv-from-container entry-author"><span class="entry-source-title-parent">from
+<span class="iv-from link" onclick="ReaderViewer.handleEvent('evFrom', this);">
+<input type="hidden" value="" class="fld-feed"></input>
+<span class="fld-title">Quotes of the Day</span></span>
+</span> <span class="fld-entries-formatAuthor"></span>
+      </div>
+
+
+<div class="entry-body"><div id="Div1">
+<ins class="item-body"><div class="fld-entries-content"></div>
+</ins>
+</div></div></div>
+
+
+      </div>
+</div>
+</td>
+<td class="cr"></td>
+</tr>
+<tr class="card-actionrow"><td class="cal"></td>
+<td class="ca">
+<input type="hidden" class="fld-entries-itemid" value=""></input>
+ <div class="entry-actions">
+   <span class="item-star star link" onclick="star_clicked(this, event);">
+     <span class="item-add-star">Add star</span>
+     <span class="item-remove-star">Remove star</span>
+   </span>
+   <span class="item-share star link" onclick="share_clicked(this, event);">
+      <span class="item-add-share">Share</span>
+      <span class="item-remove-share">Unshare</span>
+   </span>
+   <span class="email iv-email">
+      <span class="link" onclick="ReaderViewer.handleEvent('evEmail', this);">Email</span>
+      <span class="updated-text"> (Updated)</span>
+   </span>
+   <span class="item-read star link" onclick="itemread_clicked(this,event);">Mark as read</span>
+   <span class="tag link">
+      <span class="entry-tagging-action-title iv-edittags" onclick="ReaderViewer.handleEvent('evAddTag', this);">Edit tags: </span>
+      <ul class="user-tags-list">
+      </ul>
+    </span>
+ </div>
+<!--
+  <div class="entry-actions"><span class="item-star star link">Add star</span><span class="broadcast-inactive broadcast link">Share</span><span class="email"><span class="link">Email</span></span><span class="read-state-read read-state link">Mark as read</span><span class="tag link"><span class="entry-tagging-action-title">Add tags</span><ul class="user-tags-list"></ul></span></div>
+  -->
+</td>
+
+  <td class="car"></td></tr><tr class="card-bottomrow"><td class="cbl">&nbsp;</td><td class="cb">&nbsp;</td><td class="cbr">&nbsp;</td></tr></tbody></table>
+</div>
+</div>
+      
+<!-- shared list view header -->
+<div id="interrupt-broadcast" class="tpl-sharedview-hdr"><table class="round-box interrupt-broadcast-box" id="" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="s tl"></td>
+<td class="s"></td>
+<td class="s tr"></td></tr>
+<tr><td class="s"></td>
+<td class="c"><div id="interrupt-broadcast-main"><div class="interrupt-broadcast-header">Your <b>shared items</b> are publicly accessible.</div>
+<div class="interrupt-broadcast-links">They are available as a page at  <a href="#" onclick="alert('not implemented'); return false;" target="_blank" class="shared-items-url">XXXreaderurlhere.com/</a>  (and there's <a href="#" onclick="alert('not implemented'); return false;" class="shared-items-feed-url" target="_blank">a feed</a> <img class="feed-icon" src="themes/default/icon-rss.png" alt="" align="absmiddle"> too)
+<br><br>
+You can remove any item from the list below by clicking on its "Unshare" link.</div>
+<div class="broadcast-actions"><div class="send-broadcast broadcast-action"><div class="broadcast-action-header">Tell your friends</div>
+You can use your Gmail account to <span class="email-shared-items link">email your shared items</span> to your friends, family and co-workers.</div>
+<div class="make-broadcast-clip broadcast-action"><div class="broadcast-action-header">Put a clip on your site or blog</div>
+<div>You can also copy and paste code to <span class="clip-shared-items link">put a clip of your shared items</span> on your site.</div>
+<div class="broadcast-action-section">If you use Blogger, it's even easier, just use the "Add to Blogger" button.</div></div></div></div></td>
+<td class="s"></td></tr>
+<tr><td class="s bl"></td>
+<td class="s"></td>
+<td class="s br"></td></tr></tbody></table></div>      
+<!-- /shared list view header -->
+      
+<table><tbody>      
+  <!-- row for each feed -->
+  <tr class="tpl-settings-row data-row filtered-data">
+    <td class="chk"><input class="chkbox" value="" type="checkbox" onchange="Settings.checkChanged();">
+      <input class="fld-feed feedid" value="" type="hidden"></input>
+    </td>
+    <td class="title"><div class="subscription-title fld-title"></div></td>
+    <td class="rename"><span class="rename-link link" onclick="subs_rename_clicked(this,event);">Rename</span></td>
+    <td class="unsubscribe-cell" onclick="subs_remove_feed(this,event);"><img class="single-unsubscribe" src="themes/default/icon-unsubscribe.gif" title="Unsubscribe" alt="Unsubscribe"></td>
+    <td class="chooser" rowspan="2" valign="top">
+      <div id="" class="folder-chooser">
+        <table id="" class="button-container unselectable button-container-menu"><tbody><tr><td class="btl"></td>
+<td class="btr"></td></tr>
+<tr class="subs-folder-chooser" onclick="change_folders_clicked(this, event);"><td class="bbl"></td>
+<td class="bbr"><div class="button-body-container"><div class="button-menu-arrow"></div><span class="button-body unselectable prompt">Change folders...</span></div></td></tr></tbody></table>
+      <ul class="contents hidden">
+      </ul></div>
+    <div class="labels"><span class="l fld-folders"></span></div></td></tr>
+
+<tr class="tpl-settings-row1 feed-row filtered-data"><td></td><td colspan="3"><div class="fld-feed"></div></td></tr>
+<!-- /row for each feed -->
+</tbody></table>
+
+<table><tbody>
+  <!-- Row for each tag in the settings -> tags -->
+<tr class="data-row tpl-tags-row">
+  <!-- add class is-public to the tr, for shared tags -->
+  <td class="chk">
+    <input class="chkbox" value="" type="checkbox"
+           onclick="Settings.tagCheckChanged(this,event);">
+  </td>
+  <td class="display-name fld-folder"></td>
+  <td class="delete-cell" onclick="Settings.removefolder_clicked(event);"><img class="single-delete" src="themes/default/icon-unsubscribe.gif" title="Delete" alt="Delete"></td>
+  <td class="change-sharing" onclick="Settings.togglepublic_clicked(event);"><img src="themes/default/icon-share-active.png" class="active-icon sharing-icon" title="Click to make this tag private" alt="Click to make this tag private">
+    <img src="themes/default/icon-share-inactive.png" class="inactive-icon sharing-icon" title="Click to make this tag public" alt="Click to make this tag public"></td>
+    <td class="share-value"><span class="public-text sharing-text">public</span>
+      <span class="private-text sharing-text">private</span>
+    </td>
+    <td class="public-cell">
+      <a href="#" target="_blank" class="public-link public-page-link">view public page</a>
+<span class="link public-link email-link">email a link</span>
+<span class="link public-link clip-link">add a clip to your site</span>
+</td>
+</tr>
+  <!-- /Row for each tag in the settings -> tags -->
+
+<tr>
+  <!-- cell for dynamic bucket graph -->
+  <td class="tpl-day-bucket-cell bucket-scale-dyncell" title=""><div class="bucket" style="height: 1px;"><div class="bucket-width" style="width: 11px;"></div></div>
+</td>
+
+  <td class="tpl-hour-bucket-cell bucket-scale-dyncell" title=""><div class="bucket" style="height: 1px;"><div class="bucket-width" style="width: 12px;"></div></div>
+</td>
+
+  <td class="tpl-dow-bucket-cell bucket-scale-dyncell" title=""><div class="bucket" style="height: 1px;"><div class="bucket-width" style="width: 20px;"></div></div>
+</td>
+</tr>
+
+<!-- for reading trends - Read tab -->
+<tr class="alt first-row tpl-reading-trends-read">
+  <td class="sorting-sub-name">
+    <span title="Open this feed within the reader" class="link trends-sorting-stream-link" onclick="Reader.openFeed($('input',this).getdata());"><span class="fld-title"></span>
+<input type="hidden" class="fld-feed"></input>
+</span>
+    <a href="#" target="_blank" class="fld-link">
+    <img class="trends-sorting-homepage"
+         src="themes/default/icon-goto-mini.gif"
+         title="Go to homepage" alt="Go to homepage"
+         height="12" width="12"></a></td>
+<td class="sorting-sub-primary fld-nread">7</td>
+<td class="sorting-sub-secondary"><span class="fld-percentread">1</span>%</td>
+<td class="sorting-sub-unsubscribe">
+<span onclick="Reader.removeFeed($('input',this).getdata());ReaderViewer.handleEvent('evRefresh');">
+<input type="hidden" class="fld-feed"></input>
+ <img class="trends-sorting-unsubscribe" src="themes/default/icon-unsubscribe.gif" title="Unsubscribe" alt="Unsubscribe" height="13" width="13">
+</span>
+</td>
+</tr>
+
+<!-- for reading trends - Starred tab -->
+<tr class="alt first-row tpl-reading-trends-starred">
+  <td class="sorting-sub-name">
+    <span title="Open this feed within the reader" class="link trends-sorting-stream-link" onclick="Reader.openFeed($('input',this).getdata());"><span class="fld-title"></span>
+<input type="hidden" class="fld-feed"></input>
+</span>
+    <a href="#" target="_blank" class="fld-link">
+    <img class="trends-sorting-homepage" src="themes/default/icon-goto-mini.gif" title="Go to homepage" alt="Go to homepage" height="12" width="12"></a></td>
+<td class="sorting-sub-primary fld-starred"></td>
+
+<td class="sorting-sub-unsubscribe"><img class="trends-sorting-unsubscribe" src="themes/default/icon-unsubscribe.gif" title="Unsubscribe" alt="Unsubscribe" height="13" width="13"></td>
+</tr>
+
+<!-- for reading trends - Shared tab -->
+<tr class="alt first-row tpl-reading-trends-shared" >
+  <td class="sorting-sub-name">
+    <span title="Open this feed within the reader" class="link trends-sorting-stream-link" onclick="Reader.openFeed($('input',this).getdata());"><span class="fld-title"></span>
+<input type="hidden" class="fld-feed"></input>
+</span>
+    <a href="#" target="_blank" class="fld-link">
+    <img class="trends-sorting-homepage" src="themes/default/icon-goto-mini.gif" title="Go to homepage" alt="Go to homepage" height="12" width="12"></a></td>
+<td class="sorting-sub-primary fld-shared"></td>
+
+<td class="sorting-sub-unsubscribe"><img class="trends-sorting-unsubscribe" src="themes/default/icon-unsubscribe.gif" title="Unsubscribe" alt="Unsubscribe" height="13" width="13"></td></tr>
+
+<!-- for reading trends - emailed tab -->
+<tr class="alt first-row tpl-reading-trends-emailed" >
+  <td class="sorting-sub-name">
+    <span title="Open this feed within the reader" class="link trends-sorting-stream-link" onclick="Reader.openFeed($('input',this).getdata());"><span class="fld-title"></span>
+<input type="hidden" class="fld-feed"></input>
+</span>
+    <a href="#" target="_blank" class="fld-link">
+    <img class="trends-sorting-homepage" src="themes/default/icon-goto-mini.gif" title="Go to homepage" alt="Go to homepage" height="12" width="12"></a></td>
+<td class="sorting-sub-primary fld-emailed"></td>
+
+<td class="sorting-sub-unsubscribe"><img class="trends-sorting-unsubscribe" src="themes/default/icon-unsubscribe.gif" title="Unsubscribe" alt="Unsubscribe" height="13" width="13"></td></tr>
+
+<!-- for reading trends - mobile tab -->
+<tr class="alt first-row tpl-reading-trends-mobile" >
+  <td class="sorting-sub-name">
+    <a class="trends-sorting-stream-link" href="#" class="fld-feed">
+    <span class="fld-title"></span></a>
+<a href="#" class="fld-feed" target="_blank">
+    <img class="trends-sorting-homepage" src="themes/default/icon-goto-mini.gif" title="Go to homepage" alt="Go to homepage" height="12" width="12"></a></td>
+<td class="sorting-sub-primary fld-readonmobile"></td>
+
+<td class="sorting-sub-unsubscribe"><img class="trends-sorting-unsubscribe" src="themes/default/icon-unsubscribe.gif" title="Unsubscribe" alt="Unsubscribe" height="13" width="13"></td></tr>
+
+<!-- for subs trends - frequent tab -->
+<tr class="alt first-row tpl-subs-trends-freq">
+  <td class="sorting-sub-name">
+    <span title="Open this feed within the reader" class="link trends-sorting-stream-link" onclick="Reader.openFeed($('input',this).getdata());"><span class="fld-title"></span>
+<input type="hidden" class="fld-feed"></input>
+</span>
+    <a href="#" target="_blank" class="fld-link">
+    <img class="trends-sorting-homepage" src="themes/default/icon-goto-mini.gif" title="Go to homepage" alt="Go to homepage" height="12" width="12"></a></td>
+<td class="sorting-sub-primary fld-items_per_day">27.0</td>
+<td class="sorting-sub-secondary fld-percent_read">1%</td>
+<td class="sorting-sub-unsubscribe"><img class="trends-sorting-unsubscribe" src="themes/default/icon-unsubscribe.gif" title="Unsubscribe" alt="Unsubscribe" height="13" width="13"></td>
+</tr>
+
+<!-- for subs trends - inactive tab -->
+<tr class="alt first-row tpl-subs-trends-inactive">
+  <td class="sorting-sub-name">
+    <span title="Open this feed within the reader" class="link trends-sorting-stream-link" onclick="Reader.openFeed($('input',this).getdata());"><span class="fld-title"></span>
+<input type="hidden" class="fld-feed"></input>
+</span>
+    <a href="#" target="_blank" class="fld-link">
+    <img class="trends-sorting-homepage" src="themes/default/icon-goto-mini.gif" title="Go to homepage" alt="Go to homepage" height="12" width="12"></a></td>
+<td class="sorting-sub-primary fld-lastupdated"></td>
+
+<td class="sorting-sub-unsubscribe"><img class="trends-sorting-unsubscribe" src="themes/default/icon-unsubscribe.gif" title="Unsubscribe" alt="Unsubscribe" height="13" width="13"></td></tr>
+
+</tbody></table>
+
+<!-- recent activity (starred/shared) -->
+<div class="tpl-recent recent-item"><span class="recent-title fld-entries-title"></span>
+from
+  <span class="recent-stream-title fld-title"></span>
+</div>
+
+</div> <!-- id="templates" -->
+
+<div id="globalnodes">
+
+<!-- global - feed rename form in settings -->
+<div style="top: 0px; left: 0px;" id="hover-form" class="globalnode hover-form"><label><span class="prompt">Rename: </span><span class="fld-title"></span></label>
+<input value="" class="fld-title text" type="text"></input>
+<input value="" class="fld-feed" type="hidden"></input>
+<input value="Save" class="save button" id="subs-rename-button"
+       onclick="save_rename_clicked(this,event);" type="button"></input>
+<input value="Cancel" class="cancel button" 
+       onclick="cancel_rename_clicked(this,event);" type="button"></input>
+
+</div>
+
+<!-- global - edit tag form in listview -->
+<div style="position: absolute;" id="hover-tags-edit" class="hidden">
+<table class="round-box tags-container-box tags-container" id="tags-container-template" border="0" cellpadding="0" cellspacing="0"><tbody><tr class="top"><td class="s tl left"></td>
+<td class="s"></td>
+<td class="s tr right"></td></tr>
+<tr><td class="s left"></td>
+<td class="c"><ul><li class="user-tags-param-parent user-tags"><div class="tags-edit"><div class="tags-edit-contents"><input class="iv-addtags-input" autocomplete="off" type="text">
+<div class="help">Separate tags by commas</div>
+<div class="tags-edit-buttons"><table id="Table6" class="button-container unselectable tags-edit-save"><tbody><tr><td class="btl"></td>
+<td class="btr"></td></tr>
+<tr><td class="bbl"></td>
+<td class="bbr"><div class="iv-addtags-save button-body-container" onclick="ReaderViewer.saveTags(this, event);"><span class="button-body unselectable">Save</span></div></td></tr></tbody></table>
+<table id="Table7" class="button-container unselectable tags-edit-cancel"><tbody><tr><td class="btl"></td>
+<td class="btr"></td></tr>
+<tr><td class="bbl"></td>
+<td class="bbr"><div class="iv-addtags-cancel button-body-container" onclick="ReaderViewer.cancelTags(this, event);"><span class="button-body unselectable">Cancel</span></div></td></tr></tbody></table></div></div></div></li></ul></td>
+<td class="s right"></td></tr>
+<tr class="bottom"><td class="s bl left"></td>
+<td class="s"></td>
+<td class="s br right"></td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- send email hover form -->
+    <div style="left: 328px; top: 125px;" tabindex="0" id="hover-send-email" class="modal-dialog">
+      <div class="modal-dialog-title">
+        <span class="modal-dialog-title-text">
+          Tell your friends about your shared items 
+        </span>
+        <span class="modal-dialog-title-close">
+        </span>
+      </div>
+      <div class="modal-dialog-content">
+        <div class="email-area">
+          <table class="email-entry-table">
+            <tbody>
+              <tr>
+                <td class="field-name">
+                  From: 
+                </td>
+                <td>
+                  Chandan &lt;kudige@gmail.com&gt; 
+                </td>
+              </tr>
+              <tr>
+                <td class="field-name">
+                  To: 
+                </td>
+                <td>
+                  <input controls="goog-acr-0" autocomplete="off" haspopup="true" role="wairole:select" class="email-to" type="text">
+                  <div class="form-error-message email-to-error hidden">
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td class="field-name">
+                  Subject: 
+                </td>
+                <td>
+                  <input class="email-subject" value="Chandan has shared items with you through Yocto Reader" type="text">
+                  <div class="form-error-message email-subject-error hidden">
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2">
+                  <b>
+                    Note to go along with the item: 
+                  </b>
+                  (Optional, no more than 1,000 characters) 
+                  <br>
+                  <div class="form-error-message email-comment-error hidden">
+                  </div>
+                  <textarea class="email-comment" rows="6">
+                    Hi, I thought you might be interested in viewing the items 
+                    that I've shared through Yocto Reader. 
+                  </textarea>
+                  <div>
+                    <label>
+                      <input name="ccMe" class="email-ccme" value="true" type="checkbox">
+                      Send me a copy of this email 
+                    </label>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-dialog-buttons">
+        <button name="ok">
+          OK 
+        </button>
+        <button name="cancel">
+          Cancel 
+        </button>
+      </div>
+    </div>
+
+</div>
+</body></html>

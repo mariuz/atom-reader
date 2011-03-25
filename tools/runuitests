@@ -1,0 +1,12 @@
+#!/bin/sh
+
+if [ -x "$(which jscoverage)" -a -x "$(which x-www-browser)" ] ; then
+    rm -f uitest.html
+    cp feedread.html uitest.html
+    patch uitest.html < tests/uitest.patch
+    export TEST=start_uitest.html
+    rm -rf tests.coverage
+    jscoverage reader tests.coverage
+    cp tests/*.html tests/jscoverage.js tests.coverage
+    x-www-browser tests.coverage/$TEST
+fi

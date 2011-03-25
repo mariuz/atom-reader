@@ -1,0 +1,475 @@
+ins {
+     text-decoration: none; 
+} #markup-templates {
+     display: none; 
+} html, body {
+     margin: 0; font-size: 90%; 
+} html, body, input {
+     font-family: arial, sans-serif; 
+} body {
+     background: #fff url("/reader/ui/3273805013-body-bkg.png") repeat-x 0 0; color: #000; 
+} div, form {
+     margin: 0; 
+} html.settings, body.settings {
+     overflow: auto; 
+} a, a:visited, ul#reading-list li, .link {
+     color: #1010c8; 
+} .link {
+     text-decoration: underline; cursor: pointer; 
+} a:focus {
+     -moz-outline: 0; 
+} a:focus, .unselectable {
+     -moz-user-select: none; -khtml-user-select: none; user-select: none; 
+} a.internal, .link.internal {
+     color: #a00; 
+} input {
+     font-size: 95%; 
+} div.clr {
+     clear: both; 
+} .hidden {
+     display: none; 
+} #loading-area {
+     position: absolute; z-index: 10000; top: 0em; left: 50%; margin-left: -26px; 
+} #loading-area p {
+     background-image: url("/reader/ui/328852282-loading.gif"); background-repeat: no-repeat; background-position: left; display: inline; font-weight: bold; padding: 0px 3px 0px 20px; margin: 0; 
+} #loading-area td.c, #loading-area td.s {
+     background-color: #FAD163; 
+} .rtl {
+     direction: rtl; right: 0px; 
+} #search {
+     position: absolute; top: 1.9em; left: 280px; padding: 0; 
+} #search form {
+     display: inline; 
+} #search-input {
+     width: 230px; 
+} #search .input-help-text {
+     color: #666; font-size: 90%; margin-top: .1em; 
+} #message-area {
+     padding: 0.3em 0.5em; text-align: center; font-weight: bold; width: auto; border-left: 0; border-right: 0; margin: 1.5em auto 0; 
+} #message-area.info-message {
+     background: #ffffd9; border: solid 1px #a7a772; 
+} #message-area.progress-message {
+     background: #b8ff6b; border: solid 1px #8bc151; 
+} #message-area.error-message {
+     background: #fdd; border: solid 1px #900; 
+} #subscribe-area {
+     position: relative; margin: 0em 1.5em 0; 
+} body.ie6 #subscribe-area {
+     border: 1px solid #fff; 
+} #chrome-unsubscribe {
+     color: #333; font-size: 100%; 
+} #chrome-unsubscribe .chrome-unsubscribe-link {
+     font-size: 100%; 
+} #chrome-subscribe {
+     background: #eaeaea; margin: 0; width: auto; font-size: 110%; -moz-border-radius: 8px; -webkit-border-radius: 8px; 
+} #chrome-subscribe .chrome-subscribe-button {
+     background-image: url("/reader/ui/2042982460-add.png"); background-position: 5px center; background-repeat: no-repeat; color: #00c; font-size: 100%; font-weight: bold; padding-left: 25px; padding-right: 5px; margin-right: 7px; width: auto; overflow: visible; 
+} #chrome-subscribe-edit div.chrome-subscribe-container {
+     background: #eaeaea; margin: -8px 0 0 0; padding: 1em; font-size: 100%; z-index: 2; -moz-border-radius: 0 0 8px 8px; -webkit-border-radius: 0 0 8px 8px; 
+} #chrome-subscribe a, #chrome-unsubscribe a {
+     padding-left: .5em; font-size: 85%; zoom: 1; 
+} #chrome-subscribe a.edit span.closed, #chrome-subscribe a span.open {
+     display: none; 
+} #chrome-subscribe a.edit span.open, #chrome-subscribe a span.closed {
+     display: inline; 
+} #chrome-subscribe-edit-title {
+     display: block; width: 100%; 
+} #chrome-subscribe-edit-tags {
+     width: 360px; 
+} #chrome-subscribe-edit label {
+     display: block; width: 100%; color: #666; 
+} #chrome-subscribe-edit label .instructions {
+     font-weight: normal; 
+} #chrome-subscribe-edit-buttons {
+     padding: .7em 0; 
+} #chrome-unsubscribe, #chrome-subscribe {
+     display: block; padding: .3em .3em .3em .4em; margin: -.6em auto .5em; 
+} #settings-frame {
+     width: 100%; border: 0; z-index: 10; position: absolute; top: 5.5em; margin: 0; padding: 0; left: -10000px; 
+} #settings-frame.loaded {
+     left: 0; 
+} .progress-bar-vertical, .progress-bar-horizontal {
+     position: relative; border: 1px solid #949dad; background: white; padding: 1px; overflow: hidden; margin: 2px; 
+} .progress-bar-horizontal {
+     width: 80%; height: 14px; 
+} .progress-bar-vertical {
+     width: 14px; height: 200px; 
+} .progress-bar-thumb {
+     position: relative; background: #a4c5ff; overflow: hidden; width: 100%; height: 100%; 
+} .progress-bar-inner {
+     position: absolute; top: 0; text-align: center; width: 100%; font-size: 90%; font-weight: normal; color: #555; padding: 2px; 
+} .progress-bar {
+     height: .3em; margin: 0 auto; 
+} .progress-bar-label {
+     font-weight: normal; font-size: 90%; margin: 0; 
+} .goog-tooltip {
+     background: infobackground; color: infotext; border: 1px solid infotext; padding: 1px; font: menu; font-size: 9pt; max-width: 40em; z-index: 2002; 
+} .popout {
+     background-repeat: no-repeat; background-color: transparent; padding: 1px 8px 1px 16px; background-position: 0 50%; background-image: url("/reader/ui/2317887107-module-new-window-icon.gif"); text-decoration: none; 
+}  body.no-chrome {
+     background: #fff; padding-bottom: 80px; 
+} body.no-chrome #message-area-outer {
+     top: 0; 
+} #body {
+     background: #e5ecf9; color: #ccc; padding: 10em 0; text-align: center; 
+} .offline-status {
+     display: none; 
+} #logo-container {
+     display: block; position: relative; width: 158px; height: 56px; 
+} #logo {
+     position: absolute; cursor: pointer; cursor: hand; padding: 0 0 4px 0; width: 146px; height: 54px; margin-left: 14px; margin-top: 6px; background: url("/reader/ui/3338954865-logo.png") no-repeat 0px 5px; 
+} #logo span {
+     display: none; 
+} #global-info {
+     position: absolute; top: 0; right: 0; margin: 0; padding: 0.3em 1em; 
+} #design-selector-link {
+     color: #cc0000; font-weight: bold; 
+} .round-box {
+     empty-cells: show; 
+} .round-box td {
+     padding: 0; margin: 0; 
+} .round-box .s {
+     font-size: 1px; line-height: 1px; 
+} .round-box td.s, .round-box td.c {
+     background-color: #ccc; 
+} .round-box .tl, .round-box .tr, .round-box .bl, .round-box .br {
+     width: 3px; height: 3px; background-repeat: no-repeat; 
+} .round-box .tl {
+     background-image: url("/reader/ui/225120104-corner_tl.gif"); background-position: top left; 
+} .round-box .tr {
+     background-image: url("/reader/ui/417926813-corner_tr.gif"); background-position: top right; 
+} .round-box .bl {
+     background-image: url("/reader/ui/438374107-corner_bl.gif"); background-position: bottom left; 
+} .round-box .br {
+     background-image: url("/reader/ui/195825403-corner_br.gif"); background-position: bottom right; 
+} .round-box .sq {
+     background-image: none; 
+} .button-container {
+     empty-cells: show; border-spacing: 0; border-collapse: collapse; cursor: pointer; float: left; 
+} .button-container td.btl, .button-container td.btr, .button-container td.bbl, .button-container td.bbr {
+     border: 0; padding: 0 !important; margin: 0; background-repeat: no-repeat; 
+} .button-container td.btl {
+     width: 6px; height: 4px; 
+} .button-container td.btr {
+     height: 4px; background-position: top right; 
+} .button-container td.bbl {
+     width: 6px; background-position: bottom left; 
+} .button-container td.bbr {
+     background-position: bottom right; padding: 0 6px 4px 0 !important; 
+} .button-container-tight td.btl {
+     width: 5px; height: 3px; 
+} .button-container-tight td.btr {
+     height: 3px; 
+} .button-container-tight td.bbl {
+     width: 5px; 
+} .button-container-tight td.bbr {
+     padding: 0 5px 3px 0 !important; 
+} .button-container-menu .button-body-container {
+     padding-right: 18px; position: relative; 
+} .button-container-menu .button-menu-arrow {
+     background: url("/reader/ui/741609184-button-down-arrow.gif") center right no-repeat; position: absolute; right: 0; top: 0; width: 14px; height: 100%; 
+} body.ie6 .button-container-menu {
+     position: relative; 
+} body.ie6 .button-container-menu .button-body-container {
+     position: static; 
+} body.ie6 .button-container-menu .button-menu-arrow {
+     top: 4px; right: 6px; 
+} body.ie6 .button-container-tight .button-menu-arrow {
+     top: 3px; right: 5px; 
+} .button-container .btl, .button-container .bbl {
+     background-image: url("/reader/ui/2687712378-button-left.gif"); 
+} .button-container .btr, .button-container .bbr {
+     background-image: url("/reader/ui/227210396-button-right.gif"); 
+} .button-container:hover .btl, .button-container:hover .bbl {
+     background-image: url("/reader/ui/2505516288-button-left-hover.gif"); 
+} .button-container:hover .btr, .button-container:hover .bbr {
+     background-image: url("/reader/ui/558146896-button-right-hover.gif"); 
+} .button-container:active .btl, .button-container-selected .btl, .button-container-selected:hover .btl, .button-container:active .bbl, .button-container-selected .bbl, .button-container-selected:hover .bbl {
+     background-image: url("/reader/ui/1272308565-button-left-selected.gif"); 
+} .button-container:active .btr, .button-container-selected .btr, .button-container-selected:hover .btr, .button-container:active .bbr, .button-container-selected .bbr, .button-container-selected:hover .bbr {
+     background-image: url("/reader/ui/3259621848-button-right-selected.gif"); 
+} .button-container-disabled {
+     filter: alpha(opacity=50); -moz-opacity: 0.5; opacity: 0.5; cursor: default; 
+} .button-container-disabled .btl, .button-container-disabled:hover .btl, .button-container-disabled .bbl, .button-container-disabled:hover .bbl {
+     background-image: url("/reader/ui/2687712378-button-left.gif"); 
+} .button-container-disabled .btr, .button-container-disabled:hover .btr, .button-container-disabled .bbr, .button-container-disabled:hover .bbr {
+     background-image: url("/reader/ui/227210396-button-right.gif"); 
+} .folder-chooser {
+     width: 142px; overflow: visible; 
+} .folder-chooser .button-container {
+     float: none; margin-right: 0; width: 100%; 
+} .folder-chooser .button-container .button-body {
+     font-size: 95%; 
+} .folder-chooser .contents {
+     position: absolute; list-style-type: none; margin: -1px 0 0 0; padding: 0; width: auto; max-height: 180px; z-index: 1000; border: solid 1px #606060; border-top: solid 1px #bbb; background: #f3f3f3; overflow: auto; overflow-x: hidden; text-align: left; 
+} li.chooser-item {
+     margin: 0; padding: 0.2em 12px 0.2em 18px; cursor: pointer; white-space: nowrap; color: #000; 
+} li.chooser-item:hover {
+     background-color: #ddd; 
+} li.chooser-item-selected {
+     background-image: url("/reader/ui/3935512252-check.gif"); background-position: 0.25em; background-repeat: no-repeat; 
+} #message-area-outer {
+     position: absolute; width: 100%; top: 2.2em; 
+} #message-area-outer table {
+     margin: 0 auto; 
+} #message-area-outer #message-area-inner {
+     font-weight: bold; padding: 0 1em; 
+} #message-area-outer.progress-message td {
+     background-color: #c8fa63; 
+} #message-area-outer.info-message td {
+     background-color: #fad163; 
+} #message-area-outer.error-message td {
+     background-color: #fc4d4d; 
+} .modal-dialog-bg {
+     position: absolute; top: 0px; left: 0px; background-color: #fff; z-index: 2000; font-size: 105%; 
+} .modal-dialog {
+     position: absolute; top: 0px; left: 0px; width: 450px; background-color: #aaf; border: 6px solid #a4c5ff; z-index: 2001; 
+} .modal-dialog-title {
+     position: relative; background-color: #e0edfe; padding: 10px 8px; font-weight: bold; font-size: 145%; cursor: default; 
+} .modal-dialog-content {
+     background-color: #fff; padding: 2px 7px; overflow: auto; 
+} .modal-dialog-buttons {
+     background-color: #fff; padding: 4px; text-align: right; 
+} .modal-dialog-buttons button {
+     margin: 5px; 
+} #scour-introduction p {
+     margin: .9em 0; 
+} #scour-introduction h2 {
+     margin: 0; font-size: 125%; 
+} .email-this-buttons {
+     overflow: auto; padding-top: 4px; 
+} #entries .entry .card .email-this-area td {
+     background-color: #C3D9FF; 
+} .email-this-send {
+     margin-right: 0.3em; 
+} .email-this-area .email-this-comment, .email-area .email-comment {
+     width: 100%; margin-right: 4px; 
+} .email-this-area .email-this-ccme {
+     margin-top: 3px; margin-left: 0px; 
+} .email-entry-table .field-name {
+     font-weight: bold; text-align: right; width: 6em; margin-right: 0.3em; vertical-align: middle; 
+} .email-entry-table .email-this-subject, .email-entry-table .email-this-to, .email-entry-table .email-subject, .email-entry-table .email-to {
+     width: 100%; 
+} .email-entry-table {
+     margin-top: 4px; width: 100%; table-layout: fixed; 
+} #entries .entry .entry-actions .email-active {
+     background-color: #C3D9FF; -moz-border-radius: 4px 4px 0 0; 
+} #entries.list .entry .entry-actions .email-active {
+     padding-bottom: 2px; padding-top: 2px; 
+} .email-this-area .form-error-message, .email-area .form-error-message {
+     color: red; font-weight: bold; 
+} #settings, #footer {
+     margin: 1.7em 1em; 
+} #settings a:focus {
+     outline: none; user-select: none; -moz-outline: none; -moz-user-select: none; -khtml-user-select: none; 
+} #settings .round-box {
+     width: 100%; 
+} #settings .round-box td {
+     background-color: #D4D4D7; 
+} #settings #header {
+     width: 100%; overflow: auto; margin-bottom: .7em; 
+} #settings #header h2 {
+     float: left; display: inline; font-size: 140%; margin: .1em 1.5em 0 .3em; 
+} #settings .close {
+     float: left; font-size: 100%; margin-top: .5em; 
+} #settings .settings-list {
+     margin: 0; padding: 0; width: 100%; 
+} #settings #settings-navigation {
+     overflow: auto; width: 100%; 
+} #settings .setting-group h3 {
+     visibility: hidden; height: 1px; overflow: hidden; 
+} #settings #settings-navigation h3 {
+     padding: .3em .6em; margin: 0; display: block; font-size: 100%; line-height: 100%; float: left; 
+} #settings #subscriptions .folder-chooser .button-container .button-body {
+     white-space: nowrap; 
+} #settings #subscriptions .folder-chooser {
+     width: 200px; 
+} #settings #settings-navigation .selected a {
+     color: #000; text-decoration: none; 
+} #settings #settings-navigation .selected {
+     background-color: #FDFA86; margin-right: .2em; 
+} #settings .settings-list .setting-group {
+     list-style-type: none; font-size: 105%; width: auto; 
+} #settings .settings-list .setting-body, #settings .settings-list .setting-body td {
+     background-color: #FDFA86; 
+} #settings .settings-list .setting-body {
+     padding: 1em .5em; 
+} #settings .settings-list .setting-group {
+     display: none; 
+} #settings .settings-list li.setting-group.selected {
+     display: block; 
+} #settings .more-info {
+     color: #555; 
+} #settings .more-info, #settings .more-info a {
+     color: #555; 
+} .settings-data {
+     width: 100%; border-collapse: collapse; 
+} .settings-data td {
+     border-bottom: 1px solid #D4D4D7; padding: .2em 1em 0 0; 
+} .settings-data .title {
+     width: auto; padding-right: .3em; font-weight: bold; 
+} .settings-data .title div {
+     white-space: nowrap; overflow: hidden; min-width: 20em; max-width: 35em; 
+} body.ie6 .settings-data .title div {
+     width: 20em; 
+} .settings-data .share-value {
+     color: #777; 
+} .settings-data .l {
+     color: #777; 
+} .settings-data .feed-url div {
+     overflow: hidden; 
+} .settings-data .chk {
+     width: 14px; padding-right: 5px; 
+} .settings-data-search {
+     margin-bottom: .5em; 
+} .settings-data-actions {
+     margin: 0 0 .5em 0; 
+} .settings-data-actions .select-actions {
+     margin-right: .5em; 
+} .settings-data .share-value {
+     width: 3em; 
+} .settings-data .labels {
+     margin-top: .2em; font-size: 90%; 
+} .settings-data .single-unsubscribe {
+     cursor: pointer; padding: 1px 5px 0; 
+} .settings-data .display-name {
+     font-weight: bold; width: 15em; padding-right: .3em; 
+} .settings-data h2 {
+     margin: 0 0 1em 0; 
+} .hover-form {
+     position: absolute; padding: .3em .6em; background: #D4D4D7; border: 3px solid #D4D4D7; -moz-border-radius: 4px; z-index: 1; 
+} .hover-form label .prompt {
+     font-weight: bold; 
+} .hover-form .text {
+     display: block; margin: .2em 0 .4em; width: 16em; 
+} .hover-form input.button {
+     margin-right: .2em; 
+} .hover-form .comma-prompt {
+     color: #555; margin-bottom: .4em; 
+} #subscriptions td {
+     border: 0; vertical-align: top; padding-top: .4em; 
+} #subscriptions tr.data-row td.chooser, #subscriptions tr.feed-row td {
+     border-bottom: 1px solid #D4D4D7; 
+} #subscriptions tr.feed-row td {
+     padding: 0 0 .2em; color: #777; white-space: wrap; max-width: 40em; 
+} #setting-subscriptions #subscriptions .rename {
+     width: 7em; white-space: nowrap; 
+} .subs-change-label {
+     margin-left: 0.5em; 
+} .subs-change-label .a, .subs-change-label .r {
+     text-indent: 10px; 
+} #setting-subscriptions-add {
+     padding: 0em .2em .7em; border-bottom: 1px solid #D4D4D7; margin-bottom: 1em; 
+} #subs-add-url {
+     width: 230px; 
+} #subscriptions.filtered tr.data-row, #subscriptions.filtered tr.feed-row {
+     display: none; 
+} #subscriptions.filtered tr.filtered-data {
+     display: table-row; 
+} body.ie #subscriptions.filtered tr.filtered-data {
+     display: block; 
+} #setting-subscriptions-bulk-edit {
+     overflow: auto; width: 100%; 
+} #main-bulk-actions {
+     float: left; 
+} #other-bulk-actions {
+     text-align: right; float: right; 
+} .subs-filter-prompt {
+     display: block; font-size: 85%; color: #555; margin-top: .1em; 
+} #setting-subscriptions.add-focus #setting-subscriptions-bulk-edit, #setting-subscriptions.add-focus #subscriptions {
+     display: none; 
+} #setting-subscriptions .subs-remove-add-focus {
+     display: none; 
+} #setting-subscriptions.add-focus .subs-remove-add-focus {
+     display: block; text-align: center; 
+} .labels-change-sharing {
+     margin-left: 0.5em; 
+} #labels .private-text {
+     color: #aaa; 
+} #labels .public-text, #labels .active-icon {
+     display: none; 
+} #labels .is-public .public-text, #labels .is-public .active-icon {
+     display: inline; 
+} #labels .is-public .private-text, #labels .is-public .inactive-icon {
+     display: none; 
+} #labels .share-value {
+     width: 160px; 
+} #labels .public-link {
+     display: none; margin-right: .7em; 
+} #labels .is-public .public-link {
+     display: inline; 
+} #labels .change-sharing {
+     width: 24px; padding: 0; 
+} #labels-static .private-text {
+     color: #aaa; 
+} #labels-static .public-text, #labels-static .active-icon {
+     display: none; 
+} #labels-static .is-public .public-text, #labels-static .is-public .active-icon {
+     display: inline; 
+} #labels-static .is-public .private-text, #labels-static .is-public .inactive-icon {
+     display: none; 
+} #labels-static .share-value {
+     width: 160px; 
+} #labels-static .public-link {
+     display: none; margin-right: .7em; 
+} #labels-static .is-public .public-link {
+     display: inline; 
+} #labels-static .change-sharing {
+     width: 24px; padding: 0; 
+} .settings-data .sharing-icon {
+     cursor: pointer; 
+} .settings-data .single-delete, .settings-data .single-unsubscribe {
+     cursor: pointer; padding: 1px 5px 0; 
+} #goodies table td {
+     border: 0; 
+} #homepage-table {
+     margin-bottom: 1em; 
+} #goodies {
+     width: 500px; 
+} #mobile-link {
+     text-align: center; 
+} .bookmarklet {
+     background-color: #D4D4D7; padding: 5px; -moz-border-radius: 8px; 
+} .next-hint {
+     color: #666; 
+} #setting-goodies-actions {
+     margin-bottom: 1em; 
+} #import-form-target {
+     position: absolute; left: -9000px; width: 50px; 
+} #import-form {
+     margin-top: .7em; 
+} #import-form #import-buttons {
+     margin-top: 0.5em; 
+} #import-form #import-buttons input {
+     margin-right: 0.5em; 
+} #import-form #import-buttons input.default {
+     font-weight: bold; 
+} #import-form #import-cancel {
+     display: none; 
+} .setting-import, .setting-export {
+     padding: 1em; 
+} .setting-import {
+     border-bottom: 1px solid #D4D4D7; 
+} body.ie6 .setting-import {
+     position: relative; zoom: 1; 
+} .setting-export .more-info {
+     margin-left: 2em; 
+} #setting-view-selector {
+     margin-bottom: 1em; width: 400px; padding-top: 0; 
+} #setting-extras .extra-header {
+     font-weight: bold; margin-bottom: 1em; 
+} #setting-extras .extra-start-page-header {
+     display: inline; margin-right: 1em; 
+} #setting-extras .extra {
+     border-bottom: 1px solid #D4D4D7; padding: .6em 0; margin: 0; 
+} #footer {
+     padding: .2em 0; 
+} #footer {
+     text-align: center; 
+} .ac-renderer {
+     border: 1px solid #666; background: #eee; color: #000; z-index: 20000; position: absolute; 
+} .ac-renderer div {
+     padding: 1px 3px; 
+} .ac-renderer .active {
+     background: #bbb; 
+}

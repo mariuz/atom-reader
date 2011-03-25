@@ -1,0 +1,24 @@
+yocto-reader for Debian
+-----------------------
+
+1) Include a copy of the example apache-alias.conf file to your apache
+   configuration. You can find the example apache-alias.conf file in
+   /usr/share/doc/yocto-reader/examples.
+
+   The alias file has also been installed to
+   /etc/apache2/conf.d/yocto-reader-alias.conf to automatically enable
+   yocto-reader in your apache configuration.
+   Move, edit or delete according to your preferences.
+
+   A default setting for apache also been installed to
+   /etc/apache2/conf.d/yocto-reader.conf to automatically include it to your
+   apache2 configuration. You should not need to edit this file.
+
+2) Access the feedread.html via http URL
+   http://<yourhost>/yocto-reader/feedread.html
+
+Optional:
+   Edit /etc/yocto-reader/mockapi.js and change the default RSS feeds by
+   changing the FRV_feedlist and FRV_feedinfo variables.
+
+ -- Ola Lundqvist <ola@opalsys.net>  Mon, 17 Dec 2007 19:45:01 +0100
