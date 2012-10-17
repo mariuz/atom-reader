@@ -921,7 +921,7 @@ ReaderViewer.setMenu = function(kind) {
 
     }
 
-    $("#order-by-newest,#order-by-oldest,$order-by-magic", 
+    $("#order-by-newest,#order-by-oldest,#order-by-magic", 
       $("#lv-settings-menu-contents")).removeClass("chooser-item-selected");
 
     $("#order-by-" + this.SortMode, $("#lv-settings-menu-contents")).
