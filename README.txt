@@ -8,10 +8,12 @@ a backend will be written at a later date in Node.js and Firebird.
 The plan for Backend is to convert RSS/Atom feed to a Json stream http://rssjs.org/ that can be previwed in 
 the Frontend 
 
+Conversion tools for node
+https://npmjs.org/package/rsj
 
 KEY FEATURES
 
-* Web 2.0 application
+* Web 3.0 application
 * Keyword based search for news feeds
 * Browse and subscribe to feed bundles
 * Starring and sharring favourite news items
@@ -21,7 +23,7 @@ KEY FEATURES
 * Uses Google feed reader API
 * List View, Expanded View, Subscription View, Preferences etc.
 
-INSTALLATION
+INSTALLATION To be updated
 
 Step 1.   Unzip this distribution under the web server's DocumentRoot
           hierarchy.
