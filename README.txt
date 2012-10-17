@@ -1,4 +1,4 @@
-Yocto-reader - The free light-weight RSS news reader prototype version 0.2
+Yocto-reader - The free light-weight RSS news reader prototype version 0.3
 
 ABSTRACT
 
