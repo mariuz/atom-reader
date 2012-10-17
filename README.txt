@@ -2,11 +2,10 @@ Yocto-reader - The free light-weight RSS news reader prototype version 0.2
 
 ABSTRACT
 
-Yocto-reader is a prototype of a web based RSS reader written in
+Yocto-reader is a  web based RSS reader written in
 Javascript. In this release the GUI front end is fully functional but
-does not have a backend available yet. 
+a backend will be written at a later date in node.js and firebird. 
 
-Primary development site is http://yocto-reader.flouzo.net/ 
 
 KEY FEATURES
 
@@ -40,11 +39,11 @@ LIMITATIONS OF THE PROTOTYPE
 * No user login 
 * Changes are not persistent as it lacks a backend
           
-AUTHORS
+Initial AUTHORS
 
 * Loic Dachary 
 * Chandan Kudige
 
-LAST UPDATED ON 07/12/2007 BY CK
+
 
 
