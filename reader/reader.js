@@ -179,12 +179,7 @@ Reader.init = function(evt) {
         if ($.browser.mozilla) {
             body.addClass('mozilla');
         } else if ($.browser.msie) { 
-            body.addClass('ie'); 
-            var ver = parseFloat($.browser.version); 
-            
-            if (ver <= 6.0) { 
-                body.addClass('ie6'); 
-            }            
+            body.addClass('ie');            
         } else if ($.browser.opera) { 
             body.addClass('opera'); 
         } else if ($.browser.safari) {
