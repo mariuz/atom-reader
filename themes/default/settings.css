@@ -31,7 +31,7 @@ ins {
 } #loading-area {
      position: absolute; z-index: 10000; top: 0em; left: 50%; margin-left: -26px; 
 } #loading-area p {
-     background-image: url("/reader/ui/328852282-loading.gif"); background-repeat: no-repeat; background-position: left; display: inline; font-weight: bold; padding: 0px 3px 0px 20px; margin: 0; 
+     background-image: url("firebird-logo-48.png"); background-repeat: no-repeat; background-position: left; display: inline; font-weight: bold; padding: 0px 3px 0px 20px; margin: 0; 
 } #loading-area td.c, #loading-area td.s {
      background-color: #FAD163; 
 } .rtl {

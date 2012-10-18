@@ -331,7 +331,7 @@
  height: 54px;
  margin-left: 14px;
  margin-top: 6px;
- background: url("reader/ui/3338954865-logo.png") no-repeat 0px 5px;
+ background: url("firebird-logo-48.png") no-repeat 0px 5px;
  }
  #logo span { display: none;
  }
@@ -970,8 +970,8 @@ body.ie #sub-tree {
  }
  #logo { padding: 0;
  width: 133px;
- height: 28px;
- background: url("reader/ui/4184999142-logo-scroll.gif") no-repeat 0 0;
+ height: 48px;
+ background: url("firebird-logo-48.png") no-repeat 0 0;
  margin-top: 13px;
  margin-left: 9px;
  }
@@ -1724,7 +1724,6 @@ opacity: .75;
 
 -moz-opacity: 0.75;
 
-filter:progid:DXImageTransform.Microsoft.Alpha(opacity=75);
 
 }
 
