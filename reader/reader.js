@@ -92,8 +92,8 @@ function handle_resize() {
                             fieldHeight: 'clientHeight',
                             fieldWidth: 'clientWidth'};
     sizeElements['opera'] = 
-        sizeElements['safari'] = 
-        sizeElements['mozilla'] = {obj: window,
+    sizeElements['safari'] = 
+    sizeElements['mozilla'] = {obj: window,
                                    fieldHeight: 'innerHeight',
                                    fieldHeight: 'innerWidth'};
     $.each(sizeElements, function(browsertype, info) {
