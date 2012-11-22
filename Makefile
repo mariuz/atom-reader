@@ -72,11 +72,6 @@ DIST_FILES = ./ChangeLog ./LICENSE.txt ./Makefile ./README.txt ./apache-alias.co
 
 all:
 
-test:
-	if [ -t 0 ] ; then \
-		./tools/runuitests ; \
-	fi
-
 install: dist
 	mkdir -p $(DESTDIR)/usr/share/yocto-reader
 	cp -r \

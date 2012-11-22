@@ -1,12 +1,12 @@
-Yocto-reader - The free light-weight RSS news reader prototype version 0.3
+Atom-reader - The free light-weight RSS/Atom news reader 
 
 ABSTRACT
 
-Yocto-reader is a  web based RSS/Atom reader written in
+Atom-reader is a  web based RSS/Atom reader written in
 Javascript. In this release the GUI front end is fully functional but
-a backend will be written at a later date in Node.js and Firebird.
-The plan for Backend is to convert RSS/Atom feed to a Json stream http://rssjs.org/ that can be previwed in 
-the Frontend 
+a backend is written in Node.js and Firebird.
+Backend is to converting RSS/Atom feed subscriptions to Json streams 
+http://rssjs.org/ that can be previwed in the Frontend 
 
 Conversion tools for node
 https://npmjs.org/package/rsj
@@ -20,10 +20,9 @@ KEY FEATURES
 * Custom tagging and folders 
 * Tracking of read items
 * Loading huge amount of news items in background
-* Uses Google feed reader API
 * List View, Expanded View, Subscription View, Preferences etc.
 
-INSTALLATION To be updated
+INSTALLATION TODO: be updated
 
 Step 1.   Unzip this distribution under the web server's DocumentRoot
           hierarchy.
@@ -38,10 +37,10 @@ TEST CASES
 All the testcases can be executed by the command tools/runuitests
 (Requires jscoverage in the path)
 
-LIMITATIONS OF THE PROTOTYPE
+TODO:
 
-* No user login 
-* Changes are not persistent as it lacks a backend
+* User login with Oauth 
+* Changes to be persistent on backend
           
 Initial AUTHORS
 

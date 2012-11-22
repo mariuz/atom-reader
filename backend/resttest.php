@@ -17,7 +17,7 @@ curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 curl_setopt($this->ch, CURLOPT_POST, true);
 curl_setopt($this->ch, CURLOPT_POSTFIELDS, $postData);
 
-$result = curl_exec($this->ch);
+$result = curl_exec($ch);
 print $result;
 
 ?>
