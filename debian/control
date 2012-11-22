@@ -9,6 +9,4 @@ Package: yocto-reader
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: web based RSS reader
- Yocto-reader is a prototype of a web based RSS reader written in
- Javascript. In this release the GUI front end is fully functional but
- does not have a backend available yet. 
+ Yocto-reader is a a web based RSS reader written in pure Javascript. 

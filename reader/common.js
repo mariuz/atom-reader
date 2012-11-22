@@ -80,10 +80,6 @@ jQuery.fn.extend({
         case 'A':
             return 'href';
             
-/* // We dont use this
-        case 'IMG':
-            return 'src'; 
-*/            
         default:
             return 'innerHTML';
         }

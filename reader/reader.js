@@ -66,10 +66,7 @@ function handle_resize() {
     var winh, winw;
     
     var sizeElements = {};
-
-    sizeElements['msie'] = {obj: document.documentElement,
-                            fieldHeight: 'clientHeight',
-                            fieldWidth: 'clientWidth'};
+        
     sizeElements['opera'] = 
     sizeElements['safari'] = 
     sizeElements['mozilla'] = {obj: window,

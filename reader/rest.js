@@ -1,4 +1,4 @@
-var REST_root = 'http://backend.yocto.aminche.com/';
+var REST_root = 'http://localhost:8000/';
 var REST_user = 'test';
 
 function encodeParams(opcode, params) {
@@ -59,27 +59,17 @@ AsyncContext.prototype._onDone = function(i, reply) {
 function loadUrl (url, processingFunction, async)
 {
     async = true;
-    // enableMozillaAccess ()
-    
+        
     var httpRequestObj = null
         try {
         if (window.XMLHttpRequest)
         {
             httpRequestObj = new XMLHttpRequest ()
-        }
-        else if (window.ActiveXObject)
-        {
-            httpRequestObj = new ActiveXObject ("Microsoft.XMLHTTP")
-        }
+        }        
     } catch(e) {
         alert(e.message);
     }
-    if (httpRequestObj == null)
-    {
-        alert("You need browser with XMLHTTPRequest support.")
-            throw("You need browser with XMLHTTPRequest support");
-    }
-    
+        
     httpRequestObj.onreadystatechange = function () {stateChange (httpRequestObj, processingFunction)}
     httpRequestObj.open ("GET", url, async)
         httpRequestObj.setRequestHeader( "If-Modified-Since", "Sat, 1 Jan 2000 00:00:00 GMT" );

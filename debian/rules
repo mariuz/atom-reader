@@ -9,14 +9,6 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-CFLAGS = -Wall -g
-
-ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
-	CFLAGS += -O0
-else
-	CFLAGS += -O2
-endif
-
 configure: configure-stamp
 configure-stamp:
 	dh_testdir
@@ -32,8 +24,7 @@ build-stamp: configure-stamp
 
 	# Add here commands to compile the package.
 	$(MAKE) test
-	$(MAKE)
-	#docbook-to-man debian/yocto-reader.sgml > yocto-reader.1
+	$(MAKE)	
 
 	touch $@
 
@@ -54,11 +45,8 @@ install: build
 	dh_installdirs
 
 	# Add here commands to install the package into debian/yocto-reader.
-	$(MAKE) DESTDIR=$(CURDIR)/debian/yocto-reader install
-	mkdir -p $(CURDIR)/debian/yocto-reader/etc/apache2/conf.d
-	cp apache.conf $(CURDIR)/debian/yocto-reader/etc/apache2/conf.d/yocto-reader.conf
-	cp apache-alias.conf $(CURDIR)/debian/yocto-reader/etc/apache2/conf.d/yocto-reader-alias.conf
-
+	$(MAKE) DESTDIR=$(CURDIR)/debian/yocto-reader install	
+	
 
 # Build architecture-independent files here.
 binary-indep: build install
@@ -71,24 +59,11 @@ binary-arch: build install
 	dh_installchangelogs 
 	dh_installdocs
 	dh_installexamples
-#	dh_install
-#	dh_installmenu
-#	dh_installdebconf	
-#	dh_installlogrotate
-#	dh_installemacsen
-#	dh_installpam
-#	dh_installmime
-#	dh_python
-#	dh_installinit
-#	dh_installcron
-#	dh_installinfo
 	dh_installman
 	dh_link
 	dh_strip
 	dh_compress
 	dh_fixperms
-#	dh_perl
-#	dh_makeshlibs
 	dh_installdeb
 	dh_shlibdeps
 	dh_gencontrol
