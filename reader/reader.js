@@ -67,8 +67,6 @@ function handle_resize() {
     
     var sizeElements = {};
         
-    sizeElements['opera'] = 
-    sizeElements['safari'] = 
     sizeElements['mozilla'] = {obj: window,
                                    fieldHeight: 'innerHeight',
                                    fieldHeight: 'innerWidth'};
@@ -81,17 +79,12 @@ function handle_resize() {
         }
     });
 
-    if ($.browser.mozilla) {
-        winh = window.innerHeight; winw = window.innerWidth;
-    }
-
-
-    if ($.browser.mozilla) {
-        var pos = $("#nav-toggler").positionedOffset();
-        var delh = winh - pos[1];
-        
-        $("#nav-toggler").css('height', delh + 'px'); 
-    }
+    winh = window.innerHeight; 
+    winw = window.innerWidth;    
+    var pos = $("#nav-toggler").positionedOffset();
+    var delh = winh - pos[1];
+    $("#nav-toggler").css('height', delh + 'px'); 
+    
         
     if (ReaderViewer.state == stateListView) {
         var pos = $("#entries").positionedOffset();
