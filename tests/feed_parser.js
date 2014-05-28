@@ -4,10 +4,10 @@ var feedparser = require('feedparser')
 
 
 function callback (article) {
-	  console.log('Got article: %s', JSON.stringify(article));
+	  console.log('Got Article %s', JSON.stringify(article));
 }
 
 // You can give a local file path to parseFile()
 //   // For libxml compatibility, you can also give a URL to parseFile()
-feedparser.parseFile('http://cyber.law.harvard.edu/rss/examples/rss2sample.xml')
+feedparser.parseFile('http://feeds.bbci.co.uk/news/video_and_audio/science_and_environment/rss.xml')
      .on('article', callback);
